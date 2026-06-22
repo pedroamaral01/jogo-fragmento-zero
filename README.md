@@ -101,6 +101,7 @@ git clone https://github.com/pedroamaral01/jogo-fragmento-zero.git
 👥 Desenvolvedores
 Kaiky Linhares Emilio
 Pedro Henrique Amaral Estevão
+
 📚 Projeto Acadêmico
 
 Este projeto foi desenvolvido como atividade da disciplina de Design e Desenvolvimento de Jogos.
