@@ -61,14 +61,13 @@ Bibliotecas:
 🖼️ Capturas de Tela
 
 Tela Principal
-
+![Tela Principal](docs/images/tela-principal.jpg)
 
 HUD e Poderes
-
-
+![HUD](docs/images/hud.jpg)
 
 Tela de Game Over
-
+![Game Over](docs/images/game-over.jpg)
 
 🧪 Playtest
 
