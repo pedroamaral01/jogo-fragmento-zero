@@ -99,8 +99,8 @@ git clone https://github.com/pedroamaral01/jogo-fragmento-zero.git
 - Clique em Play.
 
 👥 Desenvolvedores
-Kaiky Linhares Emilio
-Pedro Henrique Amaral Estevão
+- Kaiky Linhares Emilio
+- Pedro Henrique Amaral Estevão
 
 📚 Projeto Acadêmico
 
