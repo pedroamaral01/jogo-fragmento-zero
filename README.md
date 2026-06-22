@@ -36,10 +36,10 @@ Cada decisão do jogador envolve administrar esse recurso de forma eficiente par
 - Linguagem: C#
 - Controle de versão: Git e GitHub
 Bibliotecas:
-1- UnityEngine
-2- UnityEngine.UI
-3- TMPro (TextMeshPro)
-4- UnityEngine.SceneManagement
+- UnityEngine
+- UnityEngine.UI
+- TMPro (TextMeshPro)
+- UnityEngine.SceneManagement
 
 🏗️ Arquitetura do Projeto
 
@@ -93,10 +93,10 @@ Pré-requisitos:
 Instalação:
 git clone https://github.com/pedroamaral01/jogo-fragmento-zero.git
 
-1- Abra o projeto na Unity Hub;
-2- Selecione a versão Unity 6.5;
-3- Abra a cena principal em Assets/Scenes;
-4- Clique em Play.
+- Abra o projeto na Unity Hub;
+- Selecione a versão Unity 6.5;
+- Abra a cena principal em Assets/Scenes;
+- Clique em Play.
 
 👥 Desenvolvedores
 Kaiky Linhares Emilio
