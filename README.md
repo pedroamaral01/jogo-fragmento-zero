@@ -12,51 +12,51 @@ Cada decisão do jogador envolve administrar esse recurso de forma eficiente par
 
 ✨ Mecânicas Principais
 
-Movimentação em quatro faixas;
-Sistema de energia com drenagem contínua;
-Obstáculos dinâmicos (Meteoros e Drones);
-Cristais colecionáveis para recuperação de energia;
-Poder Fogo com sistema de cooldown;
-Poder Gelo com efeito de congelamento temporário;
-Progressão dinâmica de dificuldade;
-Sistema de pontuação baseado em distância percorrida;
-Tela de Game Over e reinício da partida.
+- Movimentação em quatro faixas;
+- Sistema de energia com drenagem contínua;
+- Obstáculos dinâmicos (Meteoros e Drones);
+- Cristais colecionáveis para recuperação de energia;
+- Poder Fogo com sistema de cooldown;
+- Poder Gelo com efeito de congelamento temporário;
+- Progressão dinâmica de dificuldade;
+- Sistema de pontuação baseado em distância percorrida;
+- Tela de Game Over e reinício da partida.
 
 🎯 Controles
 
-↑ ou Espaço	Subir uma faixa
-↓	Descer uma faixa
-A	Ativar poder Fogo
-D	Ativar poder Gelo
-R	Reiniciar partida
+- ↑ ou Espaço	Subir uma faixa
+- ↓	Descer uma faixa
+- A	Ativar poder Fogo
+- D	Ativar poder Gelo
+- R	Reiniciar partida
 
 ⚙️ Tecnologias Utilizadas
 
-Engine: Unity 6.5
-Linguagem: C#
-Controle de versão: Git e GitHub
+- Engine: Unity 6.5
+- Linguagem: C#
+- Controle de versão: Git e GitHub
 Bibliotecas:
-UnityEngine
-UnityEngine.UI
-TMPro (TextMeshPro)
-UnityEngine.SceneManagement
+1- UnityEngine
+2- UnityEngine.UI
+3- TMPro (TextMeshPro)
+4- UnityEngine.SceneManagement
 
 🏗️ Arquitetura do Projeto
 
-Sistema: Script
-Loop principal: GameManager.cs
-Faixas: LaneSystem.cs
-Jogador: PlayerController.cs
-Poder Fogo: PowerFire.cs
-Poder Gelo: PowerIce.cs
-Obstáculos: ObstacleBase.cs
-Meteoro: Meteor.cs
-Drone: Drone.cs
-Cristal: Crystal.cs
-Bala: Bullet.cs
-Spawner: ObstacleSpawner.cs
-HUD: HUDController.cs
-Efeitos:	ScreenEffects.cs
+- Sistema: Script
+- Loop principal: GameManager.cs
+- Faixas: LaneSystem.cs
+- Jogador: PlayerController.cs
+- Poder Fogo: PowerFire.cs
+- Poder Gelo: PowerIce.cs
+- Obstáculos: ObstacleBase.cs
+- Meteoro: Meteor.cs
+- Drone: Drone.cs
+- Cristal: Crystal.cs
+- Bala: Bullet.cs
+- Spawner: ObstacleSpawner.cs
+- HUD: HUDController.cs
+- Efeitos:	ScreenEffects.cs
 
 🖼️ Capturas de Tela
 
