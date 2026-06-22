@@ -58,17 +58,6 @@ Bibliotecas:
 - HUD: HUDController.cs
 - Efeitos:	ScreenEffects.cs
 
-🖼️ Capturas de Tela
-
-Tela Principal
-![Tela Principal](docs/images/tela-principal.jpg)
-
-HUD e Poderes
-![HUD](docs/images/hud.jpg)
-
-Tela de Game Over
-![Game Over](docs/images/game-over.jpg)
-
 🧪 Playtest
 
 O protótipo passou por sessões de playtest com participantes externos ao grupo, incluindo estudantes universitários, jogadores casuais e adultos entre 25 e 50 anos.
