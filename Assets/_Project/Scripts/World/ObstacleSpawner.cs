@@ -22,6 +22,12 @@ public class ObstacleSpawner : MonoBehaviour
     [Tooltip("Respiro (s) entre um padrão e o próximo — encolhe com o tier")]
     [SerializeField] float patternGapSecs = 1.1f;
 
+    // Rampa de entrada: nos primeiros metros da corrida o espaçamento é
+    // mais generoso, para o jogador pegar a dinâmica antes da cadência
+    // normal do tier 0 (que já é a mais fácil da progressão).
+    const float OnboardingDistance = 300f;
+    const float OnboardingGapStart = 1.7f;
+
     SpawnPattern current;
     int   columnIndex;
     bool  mirrored;
@@ -41,7 +47,7 @@ public class ObstacleSpawner : MonoBehaviour
         SpawnColumn(current.columns[columnIndex]);
         columnIndex++;
 
-        float gapMult = GameManager.Instance.Difficulty.SpawnGapMultiplier;
+        float gapMult = GameManager.Instance.Difficulty.SpawnGapMultiplier * OnboardingMultiplier();
 
         if (columnIndex >= current.columns.Length)
         {
@@ -52,6 +58,12 @@ public class ObstacleSpawner : MonoBehaviour
         {
             timer = current.columnGap * gapMult;
         }
+    }
+
+    static float OnboardingMultiplier()
+    {
+        float t = Mathf.Clamp01(GameManager.Instance.Score / OnboardingDistance);
+        return Mathf.Lerp(OnboardingGapStart, 1f, t);
     }
 
     void PickPattern()

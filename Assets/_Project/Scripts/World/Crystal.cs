@@ -12,7 +12,7 @@ public class Crystal : MonoBehaviour
     static readonly Color FireColor = new Color(1f, 0.55f, 0.15f);
 
     [SerializeField] Kind  kind             = Kind.Energy;
-    [SerializeField] float energyReward     = 18f;
+    [SerializeField] float energyReward     = 22f;
     [SerializeField] float scoreReward      = 50f;
     [SerializeField] float fireChargeReward = 30f;
     [SerializeField] float rotationSpeed    = 120f;
@@ -43,6 +43,11 @@ public class Crystal : MonoBehaviour
     void Start()
     {
         GetComponent<CircleCollider2D>().isTrigger = true;
+
+        // Ver comentário em Meteor.Awake: sprite built-in do editor -> sprite
+        // 1-unidade do RuntimeSprites, para bater o tamanho real com o player.
+        var sr = GetComponent<SpriteRenderer>();
+        if (sr != null) sr.sprite = RuntimeSprites.Square;
     }
 
     void Update()

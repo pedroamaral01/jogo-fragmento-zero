@@ -16,6 +16,10 @@ public class Drone : ObstacleBase
     {
         maxHp = 2;
         base.Awake();
+
+        // Ver comentário em Meteor.Awake: sprite built-in do editor -> sprite
+        // 1-unidade do RuntimeSprites, para bater o tamanho real com o player.
+        if (bodyRenderer != null) bodyRenderer.sprite = RuntimeSprites.Square;
     }
 
     // Frozen drones stop completely

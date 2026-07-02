@@ -13,6 +13,11 @@ public class Bullet : MonoBehaviour
     {
         life = lifetime;
         GetComponent<CircleCollider2D>().isTrigger = true;
+
+        // Ver comentário em Meteor.Awake: sprite built-in do editor -> sprite
+        // 1-unidade do RuntimeSprites, para bater o tamanho real com o player.
+        var sr = GetComponent<SpriteRenderer>();
+        if (sr != null) sr.sprite = RuntimeSprites.Circle;
     }
 
     void Update()

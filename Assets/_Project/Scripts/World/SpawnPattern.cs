@@ -31,8 +31,12 @@ public class SpawnPattern
                            columns = new[] { "C...", "C...", "C..." } },
         new SpawnPattern { name = "diagonal de cristais", minTier = 0, weight = 1.2f, columnGap = 0.35f,
                            columns = new[] { "C...", ".C..", "..C.", "...C" } },
-        new SpawnPattern { name = "drone patrulha",      minTier = 0, weight = 1.5f,
+        new SpawnPattern { name = "drone patrulha",      minTier = 0, weight = 2.2f,
                            columns = new[] { "..D." } },
+        new SpawnPattern { name = "dupla de drones",     minTier = 0, weight = 1.3f, columnGap = 0.5f,
+                           columns = new[] { "..D.", ".D.." } },
+        new SpawnPattern { name = "onda mista",          minTier = 0, weight = 1.8f, columnGap = 0.5f,
+                           columns = new[] { "M...", ".D..", "..C." } },
 
         // ── Tier 1: pressão ─────────────────────────────────────────────────
         new SpawnPattern { name = "parede com brecha",   minTier = 1, weight = 2.0f,

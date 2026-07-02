@@ -18,8 +18,8 @@ public class PlayerVisual : MonoBehaviour
         body = GetComponent<SpriteRenderer>();
         if (body != null) body.sprite = RuntimeSprites.Circle;   // orbe nítido
 
-        glow = CreateLayer("Glow", RuntimeSprites.Glow, 2.8f, -1);
-        ring = CreateLayer("Ring", RuntimeSprites.Ring, 1.55f, 1);
+        glow = CreateLayer("Glow", RuntimeSprites.Glow, 2.3f, -1);
+        ring = CreateLayer("Ring", RuntimeSprites.Ring, 1.3f, 1);
         core = CreateLayer("Core", RuntimeSprites.Circle, 0.42f, 2);
         core.color = new Color(1f, 1f, 1f, 0.95f);
     }
@@ -42,8 +42,8 @@ public class PlayerVisual : MonoBehaviour
 
         // Respiração sutil do anel e do halo — energia viva
         float pulse = Mathf.Sin(Time.time * 4f);
-        ring.transform.localScale = Vector3.one * (1.55f + 0.07f * pulse);
-        glow.transform.localScale = Vector3.one * (2.8f  + 0.15f * pulse);
+        ring.transform.localScale = Vector3.one * (1.3f + 0.055f * pulse);
+        glow.transform.localScale = Vector3.one * (2.3f + 0.12f  * pulse);
     }
 
     SpriteRenderer CreateLayer(string name, Sprite sprite, float scale, int sortingOrder)

@@ -33,6 +33,11 @@ public class PowerLightning : PowerBase
             Vector3 hitPos = target.transform.position;
             LightningBoltVFX.Spawn(from, hitPos, ThemeColor);
             target.TakeDamage(damage);
+
+            // Feedback de impacto próprio (não depende do inimigo morrer) —
+            // deixa claro quem foi atingido mesmo quando o alvo sobrevive.
+            BurstVFX.Spawn(hitPos, ThemeColor, 14, 5.5f, 0.4f);
+
             from = hitPos;
         }
     }

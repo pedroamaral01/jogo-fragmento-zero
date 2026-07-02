@@ -16,9 +16,9 @@ MonoBehaviour:
   speedPerScore: 0.003
   scorePerSpeed: 2.4
   maxEnergy: 100
-  startEnergy: 60
-  drainPerSecond: 1.2
-  hitDamage: 25
+  startEnergy: 75
+  drainPerSecond: 0.9
+  hitDamage: 18
   invincibleSecs: 1.17
   killEnergyReward: 6
   lowEnergyWarning: 0.25

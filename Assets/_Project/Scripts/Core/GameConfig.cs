@@ -27,9 +27,9 @@ public class GameConfig : ScriptableObject
 
     [Header("Energia")]
     public float maxEnergy        = 100f;
-    public float startEnergy      = 60f;
-    public float drainPerSecond   = 1.2f;
-    public float hitDamage        = 25f;
+    public float startEnergy      = 75f;
+    public float drainPerSecond   = 0.9f;
+    public float hitDamage        = 18f;
     public float invincibleSecs   = 1.17f;
     public float killEnergyReward = 6f;
     [Range(0f, 1f)] public float lowEnergyWarning = 0.25f;

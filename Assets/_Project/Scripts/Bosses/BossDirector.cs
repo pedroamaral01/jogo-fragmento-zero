@@ -3,8 +3,10 @@ using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Orquestra os encontros com construtos da Mente Matriz:
-/// - Evolução Nv1 → mini-chefão; Nv2 → Guardião de Magma
-/// - Depois disso, encontros alternados por distância, com HP escalando
+/// - Puramente por distância percorrida — o jogador enfrenta inimigos e
+///   obstáculos normais por um bom trecho antes do primeiro chefão
+/// - Encontros alternados (Drone Alfa / Guardião de Magma) recorrem a cada
+///   DistanceBetweenBoss metros, com HP escalando por encontro
 /// - Spawner pausa automaticamente (estado BossFight); ao vencer, a corrida
 ///   continua com tier de dificuldade extra + recompensa
 /// Vive na raiz persistente RuntimeSystems (reset por sceneLoaded).
@@ -14,6 +16,9 @@ public class BossDirector : MonoBehaviour
     enum BossKind { DroneAlfa, MagmaGuardian }
 
     const float SpawnDelaySecs      = 2.2f;
+    // Distância mínima antes do 1º chefão — dá tempo do jogador enfrentar
+    // ondas normais de inimigos/obstáculos e pegar a dinâmica do jogo.
+    const float FirstBossDistance   = 550f;
     const float DistanceBetweenBoss = 650f;
     const int   DroneAlfaBaseHp     = 14;
     const int   GuardianBaseHp      = 26;
@@ -26,21 +31,19 @@ public class BossDirector : MonoBehaviour
     BossKind pendingKind;
     bool     hasPending;
     float    pendingTimer;
-    float    nextDistanceTrigger = -1f;
+    float    nextDistanceTrigger;
     int      encounterCount;
 
     void OnEnable()
     {
-        GameEvents.EvolutionChanged += OnEvolutionChanged;
-        GameEvents.BossDefeated     += OnBossDefeated;
-        SceneManager.sceneLoaded    += OnSceneLoaded;
+        GameEvents.BossDefeated  += OnBossDefeated;
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
     void OnDisable()
     {
-        GameEvents.EvolutionChanged -= OnEvolutionChanged;
-        GameEvents.BossDefeated     -= OnBossDefeated;
-        SceneManager.sceneLoaded    -= OnSceneLoaded;
+        GameEvents.BossDefeated  -= OnBossDefeated;
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
@@ -48,16 +51,8 @@ public class BossDirector : MonoBehaviour
         // Nova corrida: estado zerado (o boss antigo morreu com a cena)
         activeBoss          = null;
         hasPending          = false;
-        nextDistanceTrigger = -1f;
+        nextDistanceTrigger = FirstBossDistance;
         encounterCount      = 0;
-    }
-
-    void OnEvolutionChanged(int level, string stageName)
-    {
-        if (level == 1) Schedule(BossKind.DroneAlfa);
-        else if (level == 2) Schedule(BossKind.MagmaGuardian);
-        else if (level >= 3 && nextDistanceTrigger < 0f && GameManager.Instance != null)
-            nextDistanceTrigger = GameManager.Instance.Score + DistanceBetweenBoss;
     }
 
     void Schedule(BossKind kind)
@@ -73,10 +68,8 @@ public class BossDirector : MonoBehaviour
         var gm = GameManager.Instance;
         if (gm == null) return;
 
-        // Encontros recorrentes por distância (após a evolução máxima)
         if (!hasPending && activeBoss == null &&
-            nextDistanceTrigger > 0f && gm.State == GameState.Running &&
-            gm.Score >= nextDistanceTrigger)
+            gm.State == GameState.Running && gm.Score >= nextDistanceTrigger)
         {
             Schedule(encounterCount % 2 == 0 ? BossKind.DroneAlfa : BossKind.MagmaGuardian);
         }

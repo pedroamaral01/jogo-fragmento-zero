@@ -154,7 +154,7 @@ public static class CreatePrefabs
         sr.sprite = Square();
         sr.color  = new Color(0.40f, 0.988f, 0.945f);  // Ciano Base #66FCF1
         go.transform.localRotation = Quaternion.Euler(0f, 0f, 45f);
-        go.transform.localScale    = new Vector3(0.45f, 0.45f, 1f);
+        go.transform.localScale    = new Vector3(0.52f, 0.52f, 1f);
 
         // Halo (tintado junto com o corpo pelo Crystal.SetKind)
         AddChildSprite(go, "Glow", Circle(), new Color(0.40f, 0.988f, 0.945f, 0.35f),

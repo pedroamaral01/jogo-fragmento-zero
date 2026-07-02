@@ -37,10 +37,13 @@ public class EvolutionSystem : MonoBehaviour
         {
             stages = new[]
             {
-                new Stage { name = "Centelha",           energyToReach = 0f,   bodyColor = ArtPalette.Cyan,            scale = 1f    },
-                new Stage { name = "Fragmento Desperto", energyToReach = 60f,  bodyColor = new Color(0.3f, 1f, 0.8f),  scale = 1.12f },
-                new Stage { name = "Núcleo Instável",    energyToReach = 150f, bodyColor = new Color(1f, 0.9f, 0.35f), scale = 1.24f },
-                new Stage { name = "Avatar Elemental",   energyToReach = 280f, bodyColor = new Color(0.8f, 0.5f, 1f),  scale = 1.36f },
+                // Escalas reduzidas: o corpo é o sprite RuntimeSprites.Circle (1 unidade
+                // de diâmetro em escala 1) — em 1.0 o player ficava maior que qualquer
+                // obstáculo. 0.72 deixa o Fragmento Zero comparável a um meteoro (0.7).
+                new Stage { name = "Centelha",           energyToReach = 0f,   bodyColor = ArtPalette.Cyan,            scale = 0.72f },
+                new Stage { name = "Fragmento Desperto", energyToReach = 60f,  bodyColor = new Color(0.3f, 1f, 0.8f),  scale = 0.81f },
+                new Stage { name = "Núcleo Instável",    energyToReach = 150f, bodyColor = new Color(1f, 0.9f, 0.35f), scale = 0.90f },
+                new Stage { name = "Avatar Elemental",   energyToReach = 280f, bodyColor = new Color(0.8f, 0.5f, 1f),  scale = 1.00f },
             };
         }
 
