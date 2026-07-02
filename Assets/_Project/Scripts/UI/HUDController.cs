@@ -22,15 +22,13 @@ public class HUDController : MonoBehaviour
     [SerializeField] TMP_Text iceLabel;
     [SerializeField] Image    iceDurationFill;
 
-    [Header("Game Over")]
-    [SerializeField] GameObject gameOverPanel;
-    [SerializeField] TMP_Text   gameOverScore;
-    [SerializeField] TMP_Text   gameOverInstructions;
-
     // Referências cacheadas — nunca usar GetComponent por frame
     PlayerController player;
     PowerFire        fire;
     PowerIce         ice;
+    Canvas           hudCanvas;
+
+    void Awake() => hudCanvas = GetComponent<Canvas>();
 
     void OnEnable()  => GameEvents.StateChanged += OnStateChanged;
     void OnDisable() => GameEvents.StateChanged -= OnStateChanged;
@@ -43,11 +41,18 @@ public class HUDController : MonoBehaviour
             fire = player.GetComponent<PowerFire>();
             ice  = player.GetComponent<PowerIce>();
         }
+        RefreshVisibility(GameManager.Instance.State);
     }
 
     void OnStateChanged(GameState previous, GameState next)
     {
-        if (next == GameState.GameOver) ShowGameOver();
+        RefreshVisibility(next);
+    }
+
+    // HUD de gameplay não aparece no menu (o canvas desliga, o controller continua vivo)
+    void RefreshVisibility(GameState state)
+    {
+        if (hudCanvas != null) hudCanvas.enabled = state != GameState.Menu;
     }
 
     void Update()
@@ -97,12 +102,4 @@ public class HUDController : MonoBehaviour
         }
     }
 
-    void ShowGameOver()
-    {
-        if (gameOverPanel != null) gameOverPanel.SetActive(true);
-        if (gameOverScore != null)
-            gameOverScore.text = $"{Mathf.FloorToInt(GameManager.Instance.Score)} metros";
-        if (gameOverInstructions != null)
-            gameOverInstructions.text = "Pressione R para reiniciar";
-    }
 }

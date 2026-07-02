@@ -9,8 +9,8 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
-    // Sobrevive ao reload de cena: quando true, pula o menu e inicia a corrida direto.
-    static bool autoStartRun = true; // TODO F1.1: passa a iniciar em Menu
+    // Sobrevive ao reload de cena: quando true (restart), pula o menu e inicia direto.
+    static bool autoStartRun;
 
     public GameState State { get; private set; } = GameState.Menu;
 
@@ -37,7 +37,7 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        if (autoStartRun) StartRun();
+        if (autoStartRun) { autoStartRun = false; StartRun(); }
     }
 
     void Update()
@@ -50,10 +50,6 @@ public class GameManager : MonoBehaviour
             Score += Speed * cfg.scorePerSpeed * Time.deltaTime;
             Speed  = cfg.baseSpeed + Score * cfg.speedPerScore;
         }
-
-        // Restart provisório — migra para a UI de Game Over na F1.3
-        if (State == GameState.GameOver && Input.GetKeyDown(KeyCode.R))
-            RestartRun();
     }
 
     public void AddScore(float amount) => Score += amount;
@@ -102,6 +98,13 @@ public class GameManager : MonoBehaviour
     public void RestartRun()
     {
         autoStartRun   = true;
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    public void QuitToMenu()
+    {
+        autoStartRun   = false;
         Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
