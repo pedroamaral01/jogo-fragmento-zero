@@ -21,7 +21,7 @@ public class ObstacleBase : MonoBehaviour
 
     void Update()
     {
-        if (GameManager.Instance.State != GameManager.GameState.Playing) return;
+        if (!GameManager.Instance.IsGameplayActive) return;
 
         float vx = GameManager.Instance.Speed * baseSpeedMult * GetSlowFactor();
         transform.position += Vector3.left * vx * Time.deltaTime;

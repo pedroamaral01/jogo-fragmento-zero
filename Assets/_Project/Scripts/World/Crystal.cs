@@ -17,7 +17,7 @@ public class Crystal : MonoBehaviour
 
     void Update()
     {
-        if (GameManager.Instance.State != GameManager.GameState.Playing) return;
+        if (!GameManager.Instance.IsGameplayActive) return;
 
         float slow = PowerIce.Instance != null && PowerIce.Instance.IsActive ? 0.25f : 1f;
         transform.position += Vector3.left * GameManager.Instance.Speed * slow * Time.deltaTime;

@@ -53,7 +53,7 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (GameManager.Instance.State != GameManager.GameState.Playing) return;
+        if (!GameManager.Instance.IsGameplayActive) return;
 
         HandleInput();
         SmoothToLane();

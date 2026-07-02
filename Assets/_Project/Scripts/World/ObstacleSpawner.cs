@@ -16,7 +16,8 @@ public class ObstacleSpawner : MonoBehaviour
 
     void Update()
     {
-        if (GameManager.Instance.State != GameManager.GameState.Playing) return;
+        // Spawner só trabalha na corrida normal — pausa automática durante BossFight
+        if (GameManager.Instance.State != GameState.Running) return;
 
         // Accumulate in "frames at 60fps" to match the original rate formula
         frameAccum += Time.deltaTime * 60f;

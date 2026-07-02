@@ -31,13 +31,13 @@ public class HUDController : MonoBehaviour
 
     void Update()
     {
-        if (!gameOverShown && GameManager.Instance.State == GameManager.GameState.Dead)
+        if (!gameOverShown && GameManager.Instance.State == GameState.GameOver)
         {
             ShowGameOver();
             gameOverShown = true;
         }
 
-        if (GameManager.Instance.State == GameManager.GameState.Playing)
+        if (GameManager.Instance.IsGameplayActive)
             RefreshHUD();
     }
 
