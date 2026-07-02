@@ -18,10 +18,7 @@ public class GameManager : MonoBehaviour
     public bool IsGameplayActive => State == GameState.Running || State == GameState.BossFight;
 
     public float Score { get; private set; }
-    public float Speed { get; private set; } = 4.5f;
-
-    const float BASE_SPEED      = 4.5f;
-    const float SPEED_PER_SCORE = 0.003f;
+    public float Speed { get; private set; }
 
     GameState stateBeforePause = GameState.Running;
 
@@ -30,7 +27,13 @@ public class GameManager : MonoBehaviour
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
         Time.timeScale = 1f;
+        Speed = GameConfig.I.baseSpeed;
     }
+
+    void OnEnable()  => GameEvents.CrystalCollected += OnCrystalCollected;
+    void OnDisable() => GameEvents.CrystalCollected -= OnCrystalCollected;
+
+    void OnCrystalCollected(Vector3 pos, float energy, float score) => AddScore(score);
 
     void Start()
     {
@@ -43,8 +46,9 @@ public class GameManager : MonoBehaviour
         // Durante BossFight a velocidade fica travada — a arena "segura" o ritmo.
         if (State == GameState.Running)
         {
-            Score += Speed * 0.04f * Time.deltaTime * 60f;
-            Speed  = BASE_SPEED + Score * SPEED_PER_SCORE;
+            var cfg = GameConfig.I;
+            Score += Speed * cfg.scorePerSpeed * Time.deltaTime;
+            Speed  = cfg.baseSpeed + Score * cfg.speedPerScore;
         }
 
         // Restart provisório — migra para a UI de Game Over na F1.3
