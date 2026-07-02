@@ -13,7 +13,7 @@ public class AudioManager : MonoBehaviour
     AudioSource sfx;
 
     AudioClip shoot, freeze, zap, gravity;
-    AudioClip hit, explosion, pickup, hurt;
+    AudioClip hit, explosion, pickup, pickupFire, hurt;
     AudioClip unlock, evolve, tierUp;
     AudioClip bossSpawn, bossPhase, bossDie;
     AudioClip gameOver, click;
@@ -39,10 +39,11 @@ public class AudioManager : MonoBehaviour
         gravity = SfxSynth.Sweep("gravity", 0.4f, 200f, 700f, 0.26f);
 
         // Combate / coleta
-        hit       = SfxSynth.NoiseBurst("hit", 0.12f, 0.32f, 0.30f);
-        explosion = SfxSynth.NoiseBurst("explosion", 0.45f, 0.48f, 0.12f);
-        pickup    = SfxSynth.Arpeggio("pickup", new[] { 660f, 990f }, 0.07f, 0.28f);
-        hurt      = SfxSynth.Sweep("hurt", 0.3f, 300f, 70f, 0.45f, square: true);
+        hit        = SfxSynth.NoiseBurst("hit", 0.12f, 0.32f, 0.30f);
+        explosion  = SfxSynth.NoiseBurst("explosion", 0.45f, 0.48f, 0.12f);
+        pickup     = SfxSynth.Arpeggio("pickup", new[] { 660f, 990f }, 0.07f, 0.28f);
+        pickupFire = SfxSynth.Arpeggio("pickupFire", new[] { 440f, 587f }, 0.07f, 0.28f);
+        hurt       = SfxSynth.Sweep("hurt", 0.3f, 300f, 70f, 0.45f, square: true);
 
         // Progressão
         unlock = SfxSynth.Arpeggio("unlock", new[] { 523f, 659f, 784f }, 0.09f, 0.32f);
@@ -68,6 +69,7 @@ public class AudioManager : MonoBehaviour
         GameEvents.EnemyDamaged     += OnEnemyDamaged;
         GameEvents.EnemyKilled      += OnEnemyKilled;
         GameEvents.CrystalCollected += OnCrystalCollected;
+        GameEvents.FireCrystalCollected += OnFireCrystalCollected;
         GameEvents.PlayerHit        += OnPlayerHit;
         GameEvents.PowerUnlocked    += OnPowerUnlocked;
         GameEvents.EvolutionChanged += OnEvolutionChanged;
@@ -84,6 +86,7 @@ public class AudioManager : MonoBehaviour
         GameEvents.EnemyDamaged     -= OnEnemyDamaged;
         GameEvents.EnemyKilled      -= OnEnemyKilled;
         GameEvents.CrystalCollected -= OnCrystalCollected;
+        GameEvents.FireCrystalCollected -= OnFireCrystalCollected;
         GameEvents.PlayerHit        -= OnPlayerHit;
         GameEvents.PowerUnlocked    -= OnPowerUnlocked;
         GameEvents.EvolutionChanged -= OnEvolutionChanged;
@@ -108,6 +111,7 @@ public class AudioManager : MonoBehaviour
     void OnEnemyDamaged(ObstacleBase enemy)                  => Play(hit, 0.6f);
     void OnEnemyKilled(ObstacleBase enemy, Vector3 pos)      => Play(explosion);
     void OnCrystalCollected(Vector3 pos, float e, float s)   => Play(pickup);
+    void OnFireCrystalCollected(Vector3 pos, float charge)   => Play(pickupFire);
     void OnPlayerHit()                                       => Play(hurt);
     void OnPowerUnlocked(PowerBase power)                    => Play(unlock);
     void OnEvolutionChanged(int level, string name)          => Play(evolve);

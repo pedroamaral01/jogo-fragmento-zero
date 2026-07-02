@@ -14,6 +14,7 @@ public static class GameSystemsBootstrap
         Object.DontDestroyOnLoad(root);
 
         root.AddComponent<BossDirector>();
+        root.AddComponent<BossArenaSupport>();
         root.AddComponent<AudioManager>();
         root.AddComponent<VFXManager>();
     }

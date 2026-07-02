@@ -16,6 +16,9 @@ public class ObstacleSpawner : MonoBehaviour
     /// <summary>Exposto para chefes que arremessam meteoros.</summary>
     public GameObject MeteorPrefab => meteorPrefab;
 
+    /// <summary>Exposto para o suporte da arena de chefão (cristais).</summary>
+    public GameObject CrystalPrefab => crystalPrefab;
+
     [Tooltip("Respiro (s) entre um padrão e o próximo — encolhe com o tier")]
     [SerializeField] float patternGapSecs = 1.1f;
 

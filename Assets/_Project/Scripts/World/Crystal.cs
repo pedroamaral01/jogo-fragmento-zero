@@ -3,10 +3,28 @@ using UnityEngine;
 [RequireComponent(typeof(CircleCollider2D))]
 public class Crystal : MonoBehaviour
 {
-    [SerializeField] float energyReward   = 18f;
-    [SerializeField] float scoreReward    = 50f;
-    [SerializeField] float rotationSpeed  = 120f;
+    public enum Kind
+    {
+        Energy,   // azul: restaura energia (vida)
+        Fire      // laranja: restaura apenas a carga do poder de Fogo
+    }
+
+    static readonly Color FireColor = new Color(1f, 0.55f, 0.15f);
+
+    [SerializeField] Kind  kind             = Kind.Energy;
+    [SerializeField] float energyReward     = 18f;
+    [SerializeField] float scoreReward      = 50f;
+    [SerializeField] float fireChargeReward = 30f;
+    [SerializeField] float rotationSpeed    = 120f;
     [SerializeField] GameObject collectEffectPrefab;
+
+    /// <summary>Usado por quem instancia em runtime (arena de chefão).</summary>
+    public void SetKind(Kind newKind)
+    {
+        kind = newKind;
+        if (kind == Kind.Fire && TryGetComponent<SpriteRenderer>(out var sr))
+            sr.color = FireColor;
+    }
 
     const float DespawnX = -10f;
 
@@ -47,8 +65,11 @@ public class Crystal : MonoBehaviour
 
     public void OnCollected()
     {
-        // Energia, score e feedback são aplicados pelos assinantes do evento
-        GameEvents.RaiseCrystalCollected(transform.position, energyReward, scoreReward);
+        // Energia/carga, score e feedback são aplicados pelos assinantes do evento
+        if (kind == Kind.Fire)
+            GameEvents.RaiseFireCrystalCollected(transform.position, fireChargeReward);
+        else
+            GameEvents.RaiseCrystalCollected(transform.position, energyReward, scoreReward);
 
         if (collectEffectPrefab != null)
             Instantiate(collectEffectPrefab, transform.position, Quaternion.identity);
