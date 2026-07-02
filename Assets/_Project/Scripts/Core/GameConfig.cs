@@ -17,6 +17,14 @@ public class GameConfig : ScriptableObject
     [Tooltip("Metros ganhos por segundo para cada unidade de Speed")]
     public float scorePerSpeed = 2.4f;
 
+    [Header("Dificuldade")]
+    [Tooltip("Velocidade máxima da corrida (teto da curva)")]
+    public float maxSpeed = 11f;
+    [Tooltip("Distâncias (m) em que o tier de dificuldade sobe")]
+    public float[] tierDistances = { 250f, 600f, 1000f, 1500f, 2100f, 2800f };
+    [Tooltip("Velocidade extra somada por tier")]
+    public float tierSpeedBonus = 0.4f;
+
     [Header("Energia")]
     public float maxEnergy        = 100f;
     public float startEnergy      = 60f;

@@ -20,6 +20,8 @@ public class GameManager : MonoBehaviour
     public float Score { get; private set; }
     public float Speed { get; private set; }
 
+    public DifficultyDirector Difficulty { get; private set; }
+
     GameState stateBeforePause = GameState.Running;
 
     void Awake()
@@ -27,7 +29,8 @@ public class GameManager : MonoBehaviour
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
         Time.timeScale = 1f;
-        Speed = GameConfig.I.baseSpeed;
+        Speed      = GameConfig.I.baseSpeed;
+        Difficulty = new DifficultyDirector(GameConfig.I.tierDistances);
     }
 
     void OnEnable()  => GameEvents.CrystalCollected += OnCrystalCollected;
@@ -48,7 +51,9 @@ public class GameManager : MonoBehaviour
         {
             var cfg = GameConfig.I;
             Score += Speed * cfg.scorePerSpeed * Time.deltaTime;
-            Speed  = cfg.baseSpeed + Score * cfg.speedPerScore;
+            Speed  = Mathf.Min(cfg.maxSpeed,
+                cfg.baseSpeed + Score * cfg.speedPerScore + Difficulty.SpeedBonus);
+            Difficulty.Tick(Score);
         }
     }
 

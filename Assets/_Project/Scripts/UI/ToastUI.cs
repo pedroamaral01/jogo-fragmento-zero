@@ -29,17 +29,22 @@ public class ToastUI : MonoBehaviour
 
     void OnEnable()
     {
-        GameEvents.EvolutionChanged += OnEvolutionChanged;
-        GameEvents.PowerUnlocked    += OnPowerUnlocked;
-        GameEvents.StateChanged     += OnStateChanged;
+        GameEvents.EvolutionChanged  += OnEvolutionChanged;
+        GameEvents.PowerUnlocked     += OnPowerUnlocked;
+        GameEvents.DifficultyChanged += OnDifficultyChanged;
+        GameEvents.StateChanged      += OnStateChanged;
     }
 
     void OnDisable()
     {
-        GameEvents.EvolutionChanged -= OnEvolutionChanged;
-        GameEvents.PowerUnlocked    -= OnPowerUnlocked;
-        GameEvents.StateChanged     -= OnStateChanged;
+        GameEvents.EvolutionChanged  -= OnEvolutionChanged;
+        GameEvents.PowerUnlocked     -= OnPowerUnlocked;
+        GameEvents.DifficultyChanged -= OnDifficultyChanged;
+        GameEvents.StateChanged      -= OnStateChanged;
     }
+
+    void OnDifficultyChanged(int tier)
+        => Enqueue($"⚠ A FENDA ESTÁ MAIS INSTÁVEL — NÍVEL {tier}", new Color(1f, 0.45f, 0.3f));
 
     void OnEvolutionChanged(int level, string stageName)
         => Enqueue($"✦ EVOLUÇÃO — {stageName.ToUpper()} ✦", new Color(1f, 0.85f, 0.2f));

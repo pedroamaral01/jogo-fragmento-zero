@@ -37,6 +37,9 @@ public static class GameEvents
     /// <summary>Um poder foi desbloqueado pela evolução.</summary>
     public static event Action<PowerBase> PowerUnlocked;
 
+    /// <summary>Tier de dificuldade da Fenda subiu.</summary>
+    public static event Action<int> DifficultyChanged;
+
     public static void RaiseStateChanged(GameState previous, GameState next)
         => StateChanged?.Invoke(previous, next);
 
@@ -60,4 +63,7 @@ public static class GameEvents
 
     public static void RaisePowerUnlocked(PowerBase power)
         => PowerUnlocked?.Invoke(power);
+
+    public static void RaiseDifficultyChanged(int tier)
+        => DifficultyChanged?.Invoke(tier);
 }
