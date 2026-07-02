@@ -34,9 +34,11 @@ public class PlayerController : MonoBehaviour
         Instance = this;
 
         // Fogo/Gelo vêm da cena (têm refs de assets); Raio/Gravidade são
-        // procedurais e podem ser garantidos em runtime
-        if (GetComponent<PowerLightning>() == null) gameObject.AddComponent<PowerLightning>();
-        if (GetComponent<PowerGravity>()  == null) gameObject.AddComponent<PowerGravity>();
+        // procedurais e podem ser garantidos em runtime.
+        // EvolutionSystem por último: seu Awake pressupõe os poderes presentes.
+        if (GetComponent<PowerLightning>()  == null) gameObject.AddComponent<PowerLightning>();
+        if (GetComponent<PowerGravity>()   == null) gameObject.AddComponent<PowerGravity>();
+        if (GetComponent<EvolutionSystem>() == null) gameObject.AddComponent<EvolutionSystem>();
     }
 
     void OnEnable()
@@ -133,6 +135,18 @@ public class PlayerController : MonoBehaviour
         blinkAccum = 0f;
         if (hitParticles != null) hitParticles.Play();
         GameEvents.RaisePlayerHit();
+    }
+
+    /// <summary>Mutação visual aplicada pela evolução (cor do corpo, escala, trail).</summary>
+    public void ApplyEvolutionVisual(Color bodyColor, float scale)
+    {
+        colorNormal = bodyColor;
+        transform.localScale = new Vector3(scale, scale, 1f);
+        if (trail != null)
+        {
+            trail.time       = 0.2f + (scale - 1f) * 0.5f;
+            trail.startWidth = 0.3f * scale;
+        }
     }
 
     // Used by powers and obstacles — positive = gain, negative = spend

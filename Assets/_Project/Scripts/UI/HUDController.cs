@@ -28,24 +28,40 @@ public class HUDController : MonoBehaviour
     readonly List<PowerSlot> slots = new List<PowerSlot>();
 
     PlayerController player;
+    EvolutionSystem  evolution;
     Canvas           hudCanvas;
+    TMP_Text         evolutionLabel;
+    Image            evolutionFill;
 
     void Awake() => hudCanvas = GetComponent<Canvas>();
 
-    void OnEnable()  => GameEvents.StateChanged += OnStateChanged;
-    void OnDisable() => GameEvents.StateChanged -= OnStateChanged;
+    void OnEnable()
+    {
+        GameEvents.StateChanged  += OnStateChanged;
+        GameEvents.PowerUnlocked += OnPowerUnlocked;
+    }
+
+    void OnDisable()
+    {
+        GameEvents.StateChanged  -= OnStateChanged;
+        GameEvents.PowerUnlocked -= OnPowerUnlocked;
+    }
 
     void Start()
     {
         player = PlayerController.Instance;
+        if (player != null) evolution = player.GetComponent<EvolutionSystem>();
 
         // Painel legado da cena (barras fixas Fogo/Gelo) foi substituído pelos slots
         var legacy = transform.Find("PowerBars");
         if (legacy != null) legacy.gameObject.SetActive(false);
 
+        BuildEvolutionDisplay();
         BuildPowerSlots();
         RefreshVisibility(GameManager.Instance.State);
     }
+
+    void OnPowerUnlocked(PowerBase power) => BuildPowerSlots();
 
     void OnStateChanged(GameState previous, GameState next)
     {
@@ -78,6 +94,14 @@ public class HUDController : MonoBehaviour
         if (scoreText != null) scoreText.text = $"{Mathf.FloorToInt(GameManager.Instance.Score)} m";
         if (speedText != null) speedText.text = $"{GameManager.Instance.Speed:F1}x";
 
+        if (evolution != null && evolutionLabel != null)
+        {
+            evolutionLabel.text  = $"NV{evolution.Level}  {evolution.Current.name.ToUpper()}";
+            evolutionLabel.color = evolution.Current.bodyColor;
+            evolutionFill.fillAmount = evolution.ProgressToNext;
+            evolutionFill.color      = evolution.Current.bodyColor;
+        }
+
         foreach (var slot in slots)
         {
             if (slot.power == null) continue;
@@ -85,6 +109,32 @@ public class HUDController : MonoBehaviour
             slot.label.text      = slot.power.HudLabel;
             slot.label.color     = slot.power.IsReady ? Color.white : new Color(0.65f, 0.65f, 0.65f);
         }
+    }
+
+    // ── Evolução ────────────────────────────────────────────────────────────
+
+    void BuildEvolutionDisplay()
+    {
+        // Nome do estágio + barra de progresso até o próximo marco (canto superior esquerdo)
+        evolutionLabel = UiFactory.Text(transform, "EvolutionLabel", "",
+            13f, new Vector2(0f, 1f), new Vector2(120, -46), new Vector2(220, 18),
+            Color.white, TextAlignmentOptions.Left);
+
+        var bgRt = UiFactory.Rect(transform, "EvolutionBarBG",
+            new Vector2(0f, 1f), new Vector2(75, -64), new Vector2(130, 7));
+        bgRt.gameObject.AddComponent<Image>().color = new Color(0.05f, 0.05f, 0.05f, 0.75f);
+
+        var fillGo = new GameObject("Fill");
+        fillGo.transform.SetParent(bgRt, false);
+        var fillRt = fillGo.AddComponent<RectTransform>();
+        fillRt.anchorMin = Vector2.zero;
+        fillRt.anchorMax = Vector2.one;
+        fillRt.offsetMin = Vector2.zero;
+        fillRt.offsetMax = Vector2.zero;
+        evolutionFill = fillGo.AddComponent<Image>();
+        evolutionFill.type       = Image.Type.Filled;
+        evolutionFill.fillMethod = Image.FillMethod.Horizontal;
+        evolutionFill.fillAmount = 0f;
     }
 
     // ── Slots de poder ──────────────────────────────────────────────────────

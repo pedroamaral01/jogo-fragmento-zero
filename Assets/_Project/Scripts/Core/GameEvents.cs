@@ -31,6 +31,12 @@ public static class GameEvents
     /// <summary>Um poder foi ativado com sucesso.</summary>
     public static event Action<PowerBase> PowerActivated;
 
+    /// <summary>O Fragmento evoluiu (nível, nome do estágio).</summary>
+    public static event Action<int, string> EvolutionChanged;
+
+    /// <summary>Um poder foi desbloqueado pela evolução.</summary>
+    public static event Action<PowerBase> PowerUnlocked;
+
     public static void RaiseStateChanged(GameState previous, GameState next)
         => StateChanged?.Invoke(previous, next);
 
@@ -48,4 +54,10 @@ public static class GameEvents
 
     public static void RaisePowerActivated(PowerBase power)
         => PowerActivated?.Invoke(power);
+
+    public static void RaiseEvolutionChanged(int level, string stageName)
+        => EvolutionChanged?.Invoke(level, stageName);
+
+    public static void RaisePowerUnlocked(PowerBase power)
+        => PowerUnlocked?.Invoke(power);
 }

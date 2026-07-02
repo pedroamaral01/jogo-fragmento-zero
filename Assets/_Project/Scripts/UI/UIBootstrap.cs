@@ -18,5 +18,7 @@ public static class UIBootstrap
         root.AddComponent<MenuController>();
         root.AddComponent<PauseController>();
         root.AddComponent<GameOverController>();
+        root.AddComponent<ToastUI>();
+        root.AddComponent<TutorialController>();
     }
 }
