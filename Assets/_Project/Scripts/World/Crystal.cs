@@ -19,8 +19,22 @@ public class Crystal : MonoBehaviour
     {
         if (!GameManager.Instance.IsGameplayActive) return;
 
-        float slow = PowerIce.Instance != null && PowerIce.Instance.IsActive ? 0.25f : 1f;
-        transform.position += Vector3.left * GameManager.Instance.Speed * slow * Time.deltaTime;
+        bool magnetized = PowerGravity.Instance != null && PowerGravity.Instance.IsActive
+                          && PlayerController.Instance != null;
+
+        if (magnetized)
+        {
+            // Gravidade ativa: o cristal é puxado direto para o player
+            transform.position = Vector3.MoveTowards(transform.position,
+                PlayerController.Instance.transform.position,
+                PowerGravity.Instance.PullSpeed * Time.deltaTime);
+        }
+        else
+        {
+            float slow = PowerIce.Instance != null && PowerIce.Instance.IsActive ? 0.25f : 1f;
+            transform.position += Vector3.left * GameManager.Instance.Speed * slow * Time.deltaTime;
+        }
+
         transform.Rotate(0f, 0f, rotationSpeed * Time.deltaTime);
 
         if (transform.position.x < DespawnX) Destroy(gameObject);
