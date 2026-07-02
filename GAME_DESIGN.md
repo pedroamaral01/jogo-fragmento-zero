@@ -42,10 +42,14 @@ Desbloqueados pela **evolução**, na ordem:
 
 | Poder | Tecla | Custo | Cooldown | Efeito |
 |---|---|---|---|---|
-| **Fogo** | A | 4 | 0.37s | Projétil (1 dano). Meteoro morre com 1, drone com 2 |
-| **Gelo** | D | 22 | — (4s de efeito) | Meteoros/cristais a 25%, drones parados, projéteis de boss a 35% |
-| **Raio** | S | 25 | 6s | Cadeia em até 4 inimigos visíveis (2 dano) — limpa hordas |
-| **Gravidade** | F | 18 | 8s | Por 5s cristais são puxados ao player |
+| **Fogo** | A | 6 de **carga** | 0.37s | Projétil (1 dano). Meteoro morre com 1, drone com 2 |
+| **Gelo** | D | 22 energia | — (4s de efeito) | Meteoros/cristais a 25%, drones parados, projéteis de boss a 35% |
+| **Raio** | S | 25 energia | 6s | Cadeia em até 4 inimigos visíveis (2 dano) — limpa hordas |
+| **Gravidade** | F | 18 energia | 8s | Por 5s cristais são puxados ao player |
+
+**Carga de Fogo**: recurso próprio do Fogo (0–100). Regenera 4/s durante o gameplay e é restaurada (+30) pelos **cristais de fogo laranja**. Na HUD, a barra do Fogo mostra a carga descendo a cada tiro e subindo com regen/cristais.
+
+**Cristais**: azuis restauram energia/vida (+18); laranja restauram só a carga de Fogo (+30). Na **arena de chefão** o suporte spawna cristal de fogo a cada ~4s e cristal azul raramente (~15s) — atirar é abundante, curar é escasso.
 
 ## Evolução do Fragmento (EvolutionSystem)
 

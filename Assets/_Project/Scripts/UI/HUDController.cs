@@ -3,35 +3,46 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+/// <summary>
+/// HUD de gameplay ancorada no canto superior esquerdo, 100% construída em
+/// runtime. Todas as barras animam suavemente (o preenchimento persegue o
+/// valor real) e piscam quando o recurso está criticamente baixo.
+/// Score/velocidade ficam no canto superior direito.
+/// </summary>
 public class HUDController : MonoBehaviour
 {
-    [Header("Energia")]
-    [SerializeField] Image    energyFill;
-    [SerializeField] TMP_Text energyLabel;
-    [SerializeField] Color    colorNormal = new Color(0f, 1f, 1f);
-    [SerializeField] Color    colorLow    = new Color(1f, 0.27f, 0.27f);
+    static readonly Color EnergyHigh = new Color(0f, 1f, 1f);
+    static readonly Color EnergyMid  = new Color(1f, 0.85f, 0.25f);
+    static readonly Color EnergyLow  = new Color(1f, 0.25f, 0.2f);
+    static readonly Color BarBg      = new Color(0.03f, 0.04f, 0.07f, 0.85f);
+    static readonly Color LabelDim   = new Color(0.65f, 0.65f, 0.65f);
 
-    [Header("Pontuação")]
-    [SerializeField] TMP_Text scoreText;
-    [SerializeField] TMP_Text speedText;
+    // Coluna esquerda: x do centro das barras (largura BarW a partir de x=14)
+    const float BarW = 232f;
+    const float BarX = 14f + BarW / 2f;
 
-    // Slots de poder são construídos em runtime a partir dos PowerBase do player —
-    // a HUD não conhece poderes concretos.
-    class PowerSlot
+    const float FillLerpSpeed = 9f;
+    const float PulseSpeed    = 9f;
+
+    class Bar
     {
-        public PowerBase power;
         public GameObject root;
-        public Image fill;
-        public TMP_Text label;
+        public Image      fill;
+        public TMP_Text   label;
+        public float      shown;   // valor exibido — persegue o alvo (lerp)
     }
 
-    readonly List<PowerSlot> slots = new List<PowerSlot>();
+    Bar energyBar;
+    readonly List<(PowerBase power, Bar bar)> powerBars = new List<(PowerBase, Bar)>();
+
+    TMP_Text scoreText;
+    TMP_Text speedText;
+    TMP_Text evolutionLabel;
+    Image    evolutionFill;
 
     PlayerController player;
     EvolutionSystem  evolution;
     Canvas           hudCanvas;
-    TMP_Text         evolutionLabel;
-    Image            evolutionFill;
 
     void Awake() => hudCanvas = GetComponent<Canvas>();
 
@@ -52,23 +63,29 @@ public class HUDController : MonoBehaviour
         player = PlayerController.Instance;
         if (player != null) evolution = player.GetComponent<EvolutionSystem>();
 
-        // Painel legado da cena (barras fixas Fogo/Gelo) foi substituído pelos slots
-        var legacy = transform.Find("PowerBars");
-        if (legacy != null) legacy.gameObject.SetActive(false);
+        // Elementos legados da cena foram substituídos pela HUD em runtime
+        HideLegacy("PowerBars");
+        HideLegacy("EnergyFill");
+        HideLegacy("ScoreText");
 
+        BuildTopRight();
+        BuildEnergyBar();
+        BuildPowerBars();
         BuildEvolutionDisplay();
-        BuildPowerSlots();
         RefreshVisibility(GameManager.Instance.State);
     }
 
-    void OnPowerUnlocked(PowerBase power) => BuildPowerSlots();
-
-    void OnStateChanged(GameState previous, GameState next)
+    void HideLegacy(string childName)
     {
-        RefreshVisibility(next);
+        var legacy = transform.Find(childName);
+        if (legacy != null) legacy.gameObject.SetActive(false);
     }
 
-    // HUD de gameplay não aparece no menu (o canvas desliga, o controller continua vivo)
+    void OnStateChanged(GameState previous, GameState next) => RefreshVisibility(next);
+
+    void OnPowerUnlocked(PowerBase power) => BuildPowerBars();
+
+    // HUD de gameplay não aparece no menu (o canvas desliga, o controller vive)
     void RefreshVisibility(GameState state)
     {
         if (hudCanvas != null) hudCanvas.enabled = state != GameState.Menu;
@@ -76,74 +93,91 @@ public class HUDController : MonoBehaviour
 
     void Update()
     {
-        // Valores contínuos (energia/score/cooldown) mudam todo frame — polling é adequado
         if (GameManager.Instance.IsGameplayActive)
             RefreshHUD();
     }
+
+    // ── Atualização por frame ───────────────────────────────────────────────
 
     void RefreshHUD()
     {
         if (player == null) return;
 
-        float pct = player.Energy / GameConfig.I.maxEnergy;
+        // Energia: gradiente ciano → amarelo → vermelho + pulso quando crítica
+        float maxEnergy = GameConfig.I.maxEnergy;
+        float pct       = player.Energy / maxEnergy;
+        bool  critical  = pct < GameConfig.I.lowEnergyWarning;
 
-        if (energyFill  != null) energyFill.fillAmount = pct;
-        if (energyLabel != null) energyLabel.text = $"ENERGIA {Mathf.FloorToInt(player.Energy)}";
-        if (energyFill  != null) energyFill.color = pct < GameConfig.I.lowEnergyWarning ? colorLow : colorNormal;
+        Color energyColor = pct > 0.5f
+            ? Color.Lerp(EnergyMid, EnergyHigh, (pct - 0.5f) * 2f)
+            : Color.Lerp(EnergyLow, EnergyMid, pct * 2f);
+
+        UpdateBar(energyBar, pct, energyColor,
+            $"ENERGIA  {Mathf.FloorToInt(player.Energy)}", critical, ready: true);
+
+        foreach (var (power, bar) in powerBars)
+        {
+            if (power == null) continue;
+            UpdateBar(bar, power.HudFillRatio, power.ThemeColor,
+                power.HudLabel, power.HudCritical, power.IsReady);
+        }
 
         if (scoreText != null) scoreText.text = $"{Mathf.FloorToInt(GameManager.Instance.Score)} m";
         if (speedText != null) speedText.text = $"{GameManager.Instance.Speed:F1}x";
 
         if (evolution != null && evolutionLabel != null)
         {
-            evolutionLabel.text  = $"NV{evolution.Level}  {evolution.Current.name.ToUpper()}";
-            evolutionLabel.color = evolution.Current.bodyColor;
-            evolutionFill.fillAmount = evolution.ProgressToNext;
+            evolutionLabel.text      = $"NV{evolution.Level}  {evolution.Current.name.ToUpper()}";
+            evolutionLabel.color     = evolution.Current.bodyColor;
+            evolutionFill.fillAmount = Mathf.Lerp(evolutionFill.fillAmount,
+                                                  evolution.ProgressToNext,
+                                                  FillLerpSpeed * Time.deltaTime);
             evolutionFill.color      = evolution.Current.bodyColor;
         }
-
-        foreach (var slot in slots)
-        {
-            if (slot.power == null) continue;
-            slot.fill.fillAmount = slot.power.HudFillRatio;
-            slot.label.text      = slot.power.HudLabel;
-            slot.label.color     = slot.power.IsReady ? Color.white : new Color(0.65f, 0.65f, 0.65f);
-        }
     }
 
-    // ── Evolução ────────────────────────────────────────────────────────────
-
-    void BuildEvolutionDisplay()
+    void UpdateBar(Bar bar, float target, Color color, string text, bool critical, bool ready)
     {
-        // Nome do estágio + barra de progresso até o próximo marco (canto superior esquerdo)
-        evolutionLabel = UiFactory.Text(transform, "EvolutionLabel", "",
-            13f, new Vector2(0f, 1f), new Vector2(120, -46), new Vector2(220, 18),
-            Color.white, TextAlignmentOptions.Left);
+        if (bar == null) return;
 
-        var bgRt = UiFactory.Rect(transform, "EvolutionBarBG",
-            new Vector2(0f, 1f), new Vector2(75, -64), new Vector2(130, 7));
-        bgRt.gameObject.AddComponent<Image>().color = new Color(0.05f, 0.05f, 0.05f, 0.75f);
+        // O preenchimento persegue o valor real — dá leitura de "subindo/descendo"
+        bar.shown = Mathf.Lerp(bar.shown, Mathf.Clamp01(target), FillLerpSpeed * Time.deltaTime);
+        bar.fill.fillAmount = bar.shown;
 
-        var fillGo = new GameObject("Fill");
-        fillGo.transform.SetParent(bgRt, false);
-        var fillRt = fillGo.AddComponent<RectTransform>();
-        fillRt.anchorMin = Vector2.zero;
-        fillRt.anchorMax = Vector2.one;
-        fillRt.offsetMin = Vector2.zero;
-        fillRt.offsetMax = Vector2.zero;
-        evolutionFill = fillGo.AddComponent<Image>();
-        evolutionFill.type       = Image.Type.Filled;
-        evolutionFill.fillMethod = Image.FillMethod.Horizontal;
-        evolutionFill.fillAmount = 0f;
+        // Crítico: barra pisca; indisponível: barra apagada
+        float alpha = 0.85f;
+        if (critical)    alpha = 0.35f + 0.5f * Mathf.Abs(Mathf.Sin(Time.time * PulseSpeed));
+        else if (!ready) alpha = 0.35f;
+        bar.fill.color = new Color(color.r, color.g, color.b, alpha);
+
+        bar.label.text  = text;
+        bar.label.color = critical ? EnergyLow : (ready ? Color.white : LabelDim);
     }
 
-    // ── Slots de poder ──────────────────────────────────────────────────────
+    // ── Construção ──────────────────────────────────────────────────────────
 
-    public void BuildPowerSlots()
+    void BuildTopRight()
     {
-        foreach (var slot in slots)
-            if (slot.root != null) Destroy(slot.root);
-        slots.Clear();
+        scoreText = UiFactory.Text(transform, "ScoreDisplay", "0 m",
+            26f, new Vector2(1f, 1f), new Vector2(-100, -26), new Vector2(180, 34),
+            Color.white, TextAlignmentOptions.Right);
+
+        speedText = UiFactory.Text(transform, "SpeedDisplay", "",
+            14f, new Vector2(1f, 1f), new Vector2(-100, -52), new Vector2(180, 20),
+            LabelDim, TextAlignmentOptions.Right);
+    }
+
+    void BuildEnergyBar()
+    {
+        energyBar = CreateBar("EnergyBar", -22f, 18f, 12f);
+        energyBar.shown = 0.6f;
+    }
+
+    void BuildPowerBars()
+    {
+        foreach (var (_, bar) in powerBars)
+            if (bar.root != null) Destroy(bar.root);
+        powerBars.Clear();
 
         if (player == null) return;
 
@@ -151,41 +185,71 @@ public class HUDController : MonoBehaviour
         foreach (var power in player.GetComponents<PowerBase>())
         {
             if (!power.IsUnlocked) continue;
-            slots.Add(CreateSlot(power, row++));
+
+            var bar = CreateBar($"PowerBar_{power.DisplayName}", -48f - row * 21f, 13f, 10f);
+            bar.shown = power.HudFillRatio;
+            powerBars.Add((power, bar));
+            row++;
         }
     }
 
-    PowerSlot CreateSlot(PowerBase power, int row)
+    void BuildEvolutionDisplay()
     {
-        float y = 50f + row * 26f;
-
-        var root = UiFactory.Rect(transform, $"PowerSlot_{power.DisplayName}",
-            Vector2.zero, new Vector2(10, y), new Vector2(240, 22)).gameObject;
-        var rootRt = root.GetComponent<RectTransform>();
-        rootRt.pivot = new Vector2(0f, 0f);
-
-        // Fundo da barra
-        var bgRt = UiFactory.Rect(root.transform, "BarBG",
-            new Vector2(0f, 0.5f), new Vector2(55, 0), new Vector2(110, 10));
-        bgRt.gameObject.AddComponent<Image>().color = new Color(0.05f, 0.05f, 0.05f, 0.75f);
-
-        // Preenchimento (cooldown/duração) na cor do poder
-        var fillGo = new GameObject("Fill");
-        fillGo.transform.SetParent(bgRt, false);
-        var fillRt = fillGo.AddComponent<RectTransform>();
-        fillRt.anchorMin = Vector2.zero;
-        fillRt.anchorMax = Vector2.one;
-        fillRt.offsetMin = Vector2.zero;
-        fillRt.offsetMax = Vector2.zero;
-        var fill = fillGo.AddComponent<Image>();
-        fill.color      = power.ThemeColor;
-        fill.type       = Image.Type.Filled;
-        fill.fillMethod = Image.FillMethod.Horizontal;
-
-        var label = UiFactory.Text(root.transform, "Label", power.HudLabel,
-            11f, new Vector2(0f, 0.5f), new Vector2(186, 0), new Vector2(140, 16),
+        evolutionLabel = UiFactory.Text(transform, "EvolutionLabel", "",
+            12f, new Vector2(0f, 1f), new Vector2(BarX, -142f), new Vector2(BarW, 16),
             Color.white, TextAlignmentOptions.Left);
 
-        return new PowerSlot { power = power, root = root, fill = fill, label = label };
+        var bgRt = UiFactory.Rect(transform, "EvolutionBarBG",
+            new Vector2(0f, 1f), new Vector2(BarX, -156f), new Vector2(BarW, 5));
+        bgRt.gameObject.AddComponent<Image>().color = BarBg;
+
+        evolutionFill = CreateFill(bgRt, Color.white);
+    }
+
+    /// <summary>Barra padrão da coluna esquerda: fundo, preenchimento e rótulo interno.</summary>
+    Bar CreateBar(string name, float y, float height, float fontSize)
+    {
+        var bgRt = UiFactory.Rect(transform, name,
+            new Vector2(0f, 1f), new Vector2(BarX, y), new Vector2(BarW, height));
+        var bg = bgRt.gameObject.AddComponent<Image>();
+        bg.color = BarBg;
+
+        var outline = bgRt.gameObject.AddComponent<Outline>();
+        outline.effectColor    = new Color(0f, 0f, 0f, 0.9f);
+        outline.effectDistance = new Vector2(1f, -1f);
+
+        var fill = CreateFill(bgRt, Color.white);
+
+        // Rótulo dentro da barra, alinhado à esquerda com margem
+        var labelGo = new GameObject("Label");
+        labelGo.transform.SetParent(bgRt, false);
+        var labelRt = labelGo.AddComponent<RectTransform>();
+        labelRt.anchorMin = Vector2.zero;
+        labelRt.anchorMax = Vector2.one;
+        labelRt.offsetMin = new Vector2(7f, 0f);
+        labelRt.offsetMax = new Vector2(-7f, 0f);
+        var label = labelGo.AddComponent<TextMeshProUGUI>();
+        label.fontSize  = fontSize;
+        label.color     = Color.white;
+        label.alignment = TextAlignmentOptions.MidlineLeft;
+
+        return new Bar { root = bgRt.gameObject, fill = fill, label = label };
+    }
+
+    static Image CreateFill(RectTransform parent, Color color)
+    {
+        var go = new GameObject("Fill");
+        go.transform.SetParent(parent, false);
+        var rt = go.AddComponent<RectTransform>();
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.offsetMin = Vector2.zero;
+        rt.offsetMax = Vector2.zero;
+        var fill = go.AddComponent<Image>();
+        fill.color      = color;
+        fill.type       = Image.Type.Filled;
+        fill.fillMethod = Image.FillMethod.Horizontal;
+        fill.fillAmount = 1f;
+        return fill;
     }
 }
