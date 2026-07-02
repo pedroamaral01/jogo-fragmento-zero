@@ -35,6 +35,10 @@ public class Bullet : MonoBehaviour
         if (hitEffectPrefab != null)
             Instantiate(hitEffectPrefab, transform.position, Quaternion.identity);
 
+        // Projéteis de chefe não consomem a bala (perfura) — senão o leque
+        // do boss vira um escudo que anula todo o DPS do jogador
+        if (other.GetComponent<BossProjectile>() != null) return;
+
         Destroy(gameObject);
     }
 }

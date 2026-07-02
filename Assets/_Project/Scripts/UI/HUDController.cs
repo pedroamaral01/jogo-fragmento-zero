@@ -246,6 +246,8 @@ public class HUDController : MonoBehaviour
         rt.offsetMin = Vector2.zero;
         rt.offsetMax = Vector2.zero;
         var fill = go.AddComponent<Image>();
+        // Image sem sprite ignora fillAmount — sprite branco é obrigatório
+        fill.sprite     = RuntimeSprites.Square;
         fill.color      = color;
         fill.type       = Image.Type.Filled;
         fill.fillMethod = Image.FillMethod.Horizontal;

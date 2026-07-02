@@ -35,6 +35,12 @@ public abstract class BossBase : MonoBehaviour, IDamageable, IPlayerHazard
 
     void Start()
     {
+        // Arena relativa à câmera real: o chefe para confortavelmente dentro
+        // da tela, independente do aspect/orthographicSize configurados
+        var cam = Camera.main;
+        if (cam != null && cam.orthographic)
+            arenaX = Mathf.Min(arenaX, cam.orthographicSize * cam.aspect - 2.4f);
+
         BuildVisual();
         if (body != null) bodyColor = body.color;
     }

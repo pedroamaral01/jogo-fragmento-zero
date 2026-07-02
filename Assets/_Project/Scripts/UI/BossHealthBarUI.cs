@@ -34,6 +34,8 @@ public class BossHealthBarUI : MonoBehaviour
         fillRt.offsetMin = Vector2.zero;
         fillRt.offsetMax = Vector2.zero;
         fill = fillGo.AddComponent<Image>();
+        // Image sem sprite ignora fillAmount — sprite branco é obrigatório
+        fill.sprite     = RuntimeSprites.Square;
         fill.color      = new Color(1f, 0.4f, 0.2f);
         fill.type       = Image.Type.Filled;
         fill.fillMethod = Image.FillMethod.Horizontal;

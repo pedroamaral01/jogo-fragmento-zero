@@ -118,15 +118,15 @@ public class EnvironmentStyler : MonoBehaviour
 
             bool spire = Random.value < 0.35f;
             go.transform.localScale = spire
-                ? new Vector3(Random.Range(0.25f, 0.5f), Random.Range(1.8f, 3.2f), 1f)
-                : new Vector3(Random.Range(1.2f, 3f), Random.Range(1.2f, 2.4f), 1f);
+                ? new Vector3(Random.Range(0.25f, 0.5f), Random.Range(1.6f, 2.8f), 1f)
+                : new Vector3(Random.Range(1f, 2.3f), Random.Range(1f, 1.9f), 1f);
             go.transform.localRotation =
                 Quaternion.Euler(0f, 0f, spire ? 0f : Random.Range(-14f, 14f));
 
             var sr = go.AddComponent<SpriteRenderer>();
             sr.sprite           = RuntimeSprites.Square;
             sr.color            = new Color(ArtPalette.Structure.r, ArtPalette.Structure.g,
-                                            ArtPalette.Structure.b, Random.Range(0.55f, 0.85f));
+                                            ArtPalette.Structure.b, Random.Range(0.35f, 0.6f));
             sr.sortingLayerName = "Background";
             sr.sortingOrder     = -40;
 
