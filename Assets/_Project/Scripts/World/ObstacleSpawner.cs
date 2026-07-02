@@ -13,6 +13,9 @@ public class ObstacleSpawner : MonoBehaviour
     [SerializeField] GameObject crystalPrefab;
     [SerializeField] float      spawnX = 9f;
 
+    /// <summary>Exposto para chefes que arremessam meteoros.</summary>
+    public GameObject MeteorPrefab => meteorPrefab;
+
     [Tooltip("Respiro (s) entre um padrão e o próximo — encolhe com o tier")]
     [SerializeField] float patternGapSecs = 1.1f;
 
