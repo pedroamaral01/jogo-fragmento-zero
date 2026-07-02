@@ -1,149 +1,107 @@
-# Fragmento Zero — Lógica e Regras do Jogo (v1.0)
+# Fragmento Zero — Demo: Modo Fenda Infinita (v2.0)
 
-Auto-runner 2D neon-espacial. O **player fica parado** no lado esquerdo (X = -5) enquanto o **mundo se move para a esquerda**. Score medido em metros percorridos.
+Auto-runner 2D neon-espacial. O **player fica parado** no lado esquerdo (X = -5) enquanto o **mundo se move para a esquerda**. Score medido em metros percorridos. A demo cobre o loop completo: menu → corrida → evolução → chefões → game over → recorde.
 
 ---
+
+## Fluxo do jogo (GameState)
+
+```
+Menu ──ENTER──▶ Running ◀──────┐
+  ▲                │            │
+  │             (evolução)      │ vitória: +1 tier,
+  │                ▼            │ +35 energia, +200 m
+  │            BossFight ───────┘
+  │                │
+  └──[M]── GameOver ◀── energia = 0        Paused: ESC alterna (timeScale 0)
+```
+
+- **Classificação indicativa** (ClassInd 10 / ESRB E10+) exibida antes do menu, 1× por sessão.
+- **Restart rápido**: R após a morte pula o menu (autoStartRun).
+- **Tutorial** contextual na primeira corrida (faixas, cristais, fogo) — 1× por instalação (PlayerPrefs).
 
 ## Player — Energia como Vida e Recurso
 
-A energia funciona ao mesmo tempo como **barra de vida** e **combustível dos poderes**.
-
-| Parâmetro | Valor |
+| Parâmetro | Valor (GameConfig) |
 |---|---|
-| Energia inicial | 60 / 100 |
-| Drenagem passiva | ~1.2 / segundo (constante) |
-| Dano por obstáculo | -25 |
-| Invencibilidade pós-hit | 1.17s (player pisca) |
+| Energia inicial / máxima | 60 / 100 |
+| Drenagem passiva | 1.2 / s |
+| Dano por obstáculo/projétil | -25 |
+| Invencibilidade pós-hit | 1.17 s (pisca) |
+| Recompensa por kill | +6 |
 
-- Energia ≤ 0 → **Game Over**
-- Energia < 25% → barra fica **vermelha**
-
----
+Energia ≤ 0 → Game Over. Barra fica vermelha abaixo de 25%.
 
 ## Movimentação — 4 Faixas
 
-```
-Faixa 0  (topo)
-Faixa 1
-Faixa 2  ← posição inicial
-Faixa 3  (baixo)
-```
+↑ / Espaço sobe, ↓ desce; interpolação suave (Lerp ×10).
 
-| Tecla | Ação |
-|---|---|
-| ↑ / Espaço | Sobe uma faixa |
-| ↓ | Desce uma faixa |
+## Poderes (PowerBase)
 
-Movimento suavizado com `Mathf.Lerp` (fator 10) — não é instantâneo.
+Desbloqueados pela **evolução**, na ordem:
 
----
-
-## Obstáculos
-
-Todos spawnam à direita da tela e se movem para a esquerda.
-**Velocidade** = `GameManager.Speed × SpeedMultiplier (1.0–1.43× aleatório por instância)`
-
-| Obstáculo | Cor | Collider | HP | Efeito no player |
+| Poder | Tecla | Custo | Cooldown | Efeito |
 |---|---|---|---|---|
-| **Meteoro** | Laranja (círculo) | CircleCollider2D | 1 | -25 energia |
-| **Drone** | Magenta + olho vermelho | BoxCollider2D | 2 | -25 energia |
-| **Cristal** | Ciano (diamante 45°) | CircleCollider2D | — | +energia (coletável) |
+| **Fogo** | A | 4 | 0.37s | Projétil (1 dano). Meteoro morre com 1, drone com 2 |
+| **Gelo** | D | 22 | — (4s de efeito) | Meteoros/cristais a 25%, drones parados, projéteis de boss a 35% |
+| **Raio** | S | 25 | 6s | Cadeia em até 4 inimigos visíveis (2 dano) — limpa hordas |
+| **Gravidade** | F | 18 | 8s | Por 5s cristais são puxados ao player |
 
-- Obstáculos com tag `"Obstacle"` → colisão com player chama `OnHitPlayer()` → `-25 energia + invencibilidade`
-- Cristais com tag `"Crystal"` → colisão com player chama `OnCollected()` → `+energia`
-- Saem em X < -10 → destruídos automaticamente
-- Matar obstáculo com bala → **+6 energia** de recompensa
+## Evolução do Fragmento (EvolutionSystem)
 
----
+Acumula **toda energia absorvida** (cristais +18, kills +6):
 
-## Poderes
+| Nv | Estágio | Marco | Ganho |
+|---|---|---|---|
+| 0 | Centelha | — | Fogo |
+| 1 | Fragmento Desperto | 60 | Gelo + **mini-chefão** |
+| 2 | Núcleo Instável | 150 | Raio + **Guardião de Magma** |
+| 3 | Avatar Elemental | 280 | Gravidade + chefes recorrentes |
 
-### Fogo — tecla `A`
+Cada estágio muda cor, escala e trail do Fragmento (toast anuncia).
 
-Dispara uma **bala amarela** para a direita.
+## Geração Procedural (SpawnPattern + ObstacleSpawner)
 
-| Parâmetro | Valor |
-|---|---|
-| Custo de energia | 4 por tiro |
-| Cooldown | 0.37s |
-| Velocidade da bala | 20 u/s |
-| Lifetime da bala | 1.17s |
-| Dano | 1 HP por acerto |
+Padrões declarativos por colunas/faixa (`"MM.M"` = parede com brecha; M meteoro, D drone, C cristal). 14 padrões com peso, espelhamento vertical e tier mínimo — paredes, corredores, diagonais de cristais, esquadrões. Um multiplicador de velocidade por padrão mantém formações coesas.
 
-- Bala acerta tag `"Obstacle"` → `TakeDamage(1)`
-- Meteoro morre com 1 tiro, Drone precisa de 2 tiros
-- Matar obstáculo → **+6 energia** ao player
-- Barra **laranja** no HUD mostra recuperação do cooldown (vazia → cheia em 0.37s)
+## Dificuldade (DifficultyDirector)
 
-### Gelo — tecla `D`
+Tier sobe por distância (250/600/1000/1500/2100/2800 m) **e** +1 permanente por chefão vencido. Cada tier: padrões mais agressivos, spawns ~12% mais densos, +0.4 de velocidade. Velocidade tem teto (11).
 
-Ativa modo **freeze** por 4 segundos.
+## Chefões (BossBase / BossDirector)
 
-| Parâmetro | Valor |
-|---|---|
-| Custo de energia | 22 |
-| Duração | 4s |
-| Efeito em Meteoros | 25% da velocidade normal |
-| Efeito em Drones | Parada total (0%) |
-| Efeito em Cristais | 25% da velocidade normal |
+Construtos da Mente Matriz; spawner pausa durante a luta; entrada invulnerável; fases por fração de HP; barra de vida no topo. HP escala +35% por encontro.
 
-- Barra **ciana** no HUD mostra contagem regressiva em segundos
-- Só pode usar com energia ≥ 22 e cooldown = 0
+| Chefe | HP base | Fases | Padrões |
+|---|---|---|---|
+| **Drone Alfa** (mini) | 14 | 2 | Persegue faixa, tiro mirado; enraivecido: leque triplo |
+| **Guardião de Magma** | 26 | 3 | Senoide, leques de magma 3→4→5, arremesso de meteoros; **Gelo contém o magma** |
 
----
+Vitória: +1 tier, +35 energia, +200 m; próximo encontro a ~650 m.
 
-## Progressão de Dificuldade
+## Áudio e VFX
 
-`GameManager` aumenta a velocidade do jogo continuamente. Quanto mais metros, mais rápido os obstáculos chegam — o jogo nunca termina por limite de tempo, só por energia zerada.
-
----
-
-## Game Over e Reinício
-
-| Condição | Resultado |
-|---|---|
-| Energia ≤ 0 | Game Over — pausa spawning, exibe painel com score em metros |
-| Tecla `R` | Reinicia (`SceneManager.LoadScene`) — tudo volta ao estado inicial |
-
----
-
-## HUD
-
-```
-[canto superior esquerdo]  Score: 0 m
-[canto inferior esquerdo]  ████████████  ← Barra de energia (ciano → vermelho < 25%)
-                           A FOGO ►  [██░░░]  ← Cooldown (laranja)
-                           D GELO    [██████]  ← Duração freeze (ciano)
-```
-
----
-
-## Estratégia Básica
-
-- **Energia** é o recurso central — toda decisão envolve gastar ou recuperar energia
-- Usar Fogo custa 4, mas matar o obstáculo devolve 6 → **lucro de +2** se acertar
-- Usar Gelo custa 22 — vale a pena com muitos obstáculos na tela ao mesmo tempo
-- Deixar Drone chegar custa 25 de energia; 2 tiros de Fogo custam 8 → **sempre vale atirar no Drone**
-- Coletar Cristais recarrega energia — **priorize a faixa com cristais** quando a energia estiver baixa
+100% procedurais (sem assets): SFX sintetizados (SfxSynth) e explosões de fragmentos (BurstVFX), ambos dirigidos por eventos. Música: drone ambiente em loop.
 
 ---
 
 ## Arquitetura Técnica (Unity 6.5)
 
-| Sistema | Script | Função |
+| Camada | Peças | Papel |
 |---|---|---|
-| Loop do jogo | `GameManager.cs` | Estado (Playing/Dead), velocidade, score |
-| Faixas | `LaneSystem.cs` | Calcula posição Y de cada faixa |
-| Player | `PlayerController.cs` | Input, energia, colisões, invencibilidade |
-| Poder Fogo | `PowerFire.cs` | Spawn de bala, cooldown, custo |
-| Poder Gelo | `PowerIce.cs` | Timer de freeze, SlowFactor |
-| Obstáculos | `ObstacleBase.cs` | Movimento, HP, dano |
-| Meteoro | `Meteor.cs` | SlowFactor via PowerIce |
-| Drone | `Drone.cs` | Para completamente com Gelo |
-| Cristal | `Crystal.cs` | Recompensa de energia |
-| Bala | `Bullet.cs` | Movimento, colisão com obstáculos |
-| Spawner | `ObstacleSpawner.cs` | Gera obstáculos aleatoriamente |
-| HUD | `HUDController.cs` | Barra energia, score, barras de poder |
-| Efeitos | `ScreenEffects.cs` | Screen shake, flash ao acertar |
+| **Core** | `GameManager` (estados), `GameEvents` (Observer), `GameConfig` (SO de balanceamento), `DifficultyDirector`, `HighScore`, `LaneSystem` | Estado global, eventos discretos, números centralizados |
+| **Player** | `PlayerController`, `PowerBase` + 4 poderes, `EvolutionSystem`, `Bullet` | Input genérico por poder; energia; evolução |
+| **World** | `ObstacleBase` (+Meteor/Drone), `Crystal`, `SpawnPattern`, `ObstacleSpawner` | Entidades anunciam eventos; spawn por padrões |
+| **Bosses** | `BossBase`, `BossProjectile`, `BossDirector`, 2 chefes | Fases, ciclo corrida→chefe→corrida |
+| **UI** | `UiFactory` + controllers (Menu/Pause/GameOver/Toast/Tutorial/BossBar/HUD) | UI construída em runtime, reativa a eventos |
+| **VFX/Audio** | `ScreenEffects`, `BurstVFX`, `LightningBoltVFX`, `RuntimeSprites`, `SfxSynth`, `AudioManager` | Feedback 100% por eventos, zero assets |
 
-**Regra física crítica:** todos os objetos com trigger (`OnTriggerEnter2D`) precisam de `Rigidbody2D Kinematic` — Player e todos os prefabs têm este componente.
+**Princípios:**
+- Entidades **anunciam** (`GameEvents.Raise…`); consequências (energia, score, som, VFX, UI) são dos assinantes — OnEnable/OnDisable sempre pareados.
+- Valores contínuos (energia/score) são lidos por polling com refs cacheadas; eventos só para fatos discretos.
+- `IDamageable`/`IPlayerHazard` desacoplam combate de hierarquias concretas.
+- Bootstraps (`UIBootstrap`, `GameSystemsBootstrap`) criam raízes persistentes (DontDestroyOnLoad) — a cena contém só o essencial (player, spawner, HUD base, câmera).
+
+**Regra física crítica:** objetos com trigger (`OnTriggerEnter2D`) precisam de `Rigidbody2D Kinematic`.
+
+**Editor tooling:** `FragmentoZero/Setup Scene`, `Create Obstacle Prefabs`, `Create Game Config Asset`, `Build Game (Windows)`.

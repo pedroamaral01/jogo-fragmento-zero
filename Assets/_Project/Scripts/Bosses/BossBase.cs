@@ -66,6 +66,10 @@ public abstract class BossBase : MonoBehaviour, IDamageable, IPlayerHazard
         hitFlashTimer = 0.08f;
         if (body != null) body.color = Color.white;
 
+        // Feedback global de acerto (som/flash). Boss não é ObstacleBase —
+        // assinantes deste evento não devem dereferenciar o argumento.
+        GameEvents.RaiseEnemyDamaged(null);
+
         if (Hp <= 0)
         {
             Die();
