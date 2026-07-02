@@ -17,5 +17,6 @@ public static class GameSystemsBootstrap
         root.AddComponent<BossArenaSupport>();
         root.AddComponent<AudioManager>();
         root.AddComponent<VFXManager>();
+        root.AddComponent<EnvironmentStyler>();
     }
 }
