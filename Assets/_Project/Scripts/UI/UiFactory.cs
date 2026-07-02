@@ -95,7 +95,11 @@ public static class UiFactory
         colors.highlightedColor = new Color(0f, 1f, 1f, 0.45f);
         colors.pressedColor     = new Color(1f, 1f, 1f, 0.6f);
         btn.colors = colors;
-        btn.onClick.AddListener(() => onClick?.Invoke());
+        btn.onClick.AddListener(() =>
+        {
+            if (AudioManager.Instance != null) AudioManager.Instance.PlayClick();
+            onClick?.Invoke();
+        });
 
         Text(rt, "Label", label, 20f, new Vector2(0.5f, 0.5f), Vector2.zero, size, Color.white);
         return btn;
