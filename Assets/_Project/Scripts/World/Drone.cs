@@ -6,10 +6,11 @@ public class Drone : ObstacleBase
     [SerializeField] SpriteRenderer eyeRenderer;
     [SerializeField] GameObject     iceSpikesObject;   // child GameObject with ice spike visuals
 
-    [SerializeField] Color colorBody       = new Color(1f, 0f, 1f);
-    [SerializeField] Color colorBodyFrozen = new Color(0.67f, 0.87f, 1f);
-    [SerializeField] Color colorEye        = new Color(1f, 0.27f, 0.27f);
-    [SerializeField] Color colorEyeFrozen  = new Color(0.8f, 0.93f, 1f);
+    // Identidade visual: carcaça = Estruturas IA; olho = Alerta/Erro IA
+    [SerializeField] Color colorBody       = new Color(0.24f, 0.30f, 0.38f);
+    [SerializeField] Color colorBodyFrozen = new Color(0.62f, 0.80f, 0.92f);
+    [SerializeField] Color colorEye        = new Color(1f, 0f, 0.235f);
+    [SerializeField] Color colorEyeFrozen  = new Color(0.75f, 0.90f, 1f);
 
     protected override void Awake()
     {

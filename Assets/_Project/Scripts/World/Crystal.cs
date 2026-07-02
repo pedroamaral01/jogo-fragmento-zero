@@ -22,8 +22,15 @@ public class Crystal : MonoBehaviour
     public void SetKind(Kind newKind)
     {
         kind = newKind;
-        if (kind == Kind.Fire && TryGetComponent<SpriteRenderer>(out var sr))
-            sr.color = FireColor;
+        if (kind != Kind.Fire) return;
+
+        // Tinge corpo e halo de laranja; o núcleo ("Core") permanece branco
+        foreach (var sr in GetComponentsInChildren<SpriteRenderer>())
+        {
+            if (sr.gameObject.name == "Core") continue;
+            float alpha = sr.color.a;
+            sr.color = new Color(FireColor.r, FireColor.g, FireColor.b, alpha);
+        }
     }
 
     const float DespawnX = -10f;
