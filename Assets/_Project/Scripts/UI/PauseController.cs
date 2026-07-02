@@ -26,6 +26,9 @@ public class PauseController : MonoBehaviour
         var gm = GameManager.Instance;
         if (gm == null) return;
 
+        // Tutorial congelou o tempo esperando tecla — pausa não compete
+        if (TutorialController.IsBlocking) return;
+
         if (Input.GetKeyDown(KeyCode.Escape) &&
             (gm.IsGameplayActive || gm.State == GameState.Paused))
             gm.TogglePause();
