@@ -6,9 +6,10 @@ using UnityEngine;
 /// </summary>
 public class BossDroneAlfa : BossBase
 {
-    static readonly Color BodyColor    = new Color(1f, 0f, 1f);
-    static readonly Color EnragedColor = new Color(1f, 0.25f, 0.55f);
-    static readonly Color ShotColor    = new Color(1f, 0.4f, 0.9f);
+    // Construto da Mente Matriz: carcaça industrial + vermelho de alerta
+    static readonly Color BodyColor    = ArtPalette.StructureLit;
+    static readonly Color EnragedColor = new Color(0.45f, 0.14f, 0.20f);
+    static readonly Color ShotColor    = ArtPalette.AlertRed;
 
     float shootTimer = 1.2f;
 
@@ -23,7 +24,9 @@ public class BossDroneAlfa : BossBase
         body = AddShape("Body", RuntimeSprites.Square, BodyColor,
             Vector3.zero, new Vector3(1.7f, 1.1f, 1f));
 
-        AddShape("Eye", RuntimeSprites.Circle, new Color(1f, 0.25f, 0.25f),
+        AddShape("EyeGlow", RuntimeSprites.Glow, new Color(1f, 0f, 0.235f, 0.5f),
+            new Vector3(-0.55f, 0.12f, 0f), new Vector3(0.9f, 0.9f, 1f), 2);
+        AddShape("Eye", RuntimeSprites.Circle, ArtPalette.AlertRed,
             new Vector3(-0.55f, 0.12f, 0f), new Vector3(0.42f, 0.42f, 1f), 3);
 
         AddShape("Antenna", RuntimeSprites.Square, new Color(0.7f, 0.7f, 0.9f),

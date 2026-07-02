@@ -7,9 +7,9 @@ using UnityEngine;
 /// </summary>
 public class BossMagmaGuardian : BossBase
 {
-    static readonly Color BodyColor  = new Color(1f, 0.45f, 0.1f);
+    static readonly Color BodyColor  = new Color(1f, 0.40f, 0.05f);   // magma vivo
     static readonly Color CoreColor  = new Color(1f, 0.85f, 0.3f);
-    static readonly Color MagmaColor = new Color(1f, 0.55f, 0.15f);
+    static readonly Color MagmaColor = ArtPalette.Fire;               // #FF4500
 
     Transform shards;          // anel de rochas orbitando
     ObstacleSpawner spawner;   // fonte do prefab de meteoro

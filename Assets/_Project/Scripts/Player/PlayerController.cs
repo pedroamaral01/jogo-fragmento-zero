@@ -39,6 +39,7 @@ public class PlayerController : MonoBehaviour
         if (GetComponent<PowerLightning>()  == null) gameObject.AddComponent<PowerLightning>();
         if (GetComponent<PowerGravity>()   == null) gameObject.AddComponent<PowerGravity>();
         if (GetComponent<EvolutionSystem>() == null) gameObject.AddComponent<EvolutionSystem>();
+        if (GetComponent<PlayerVisual>()    == null) gameObject.AddComponent<PlayerVisual>();
     }
 
     void OnEnable()

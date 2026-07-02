@@ -37,7 +37,7 @@ public class EvolutionSystem : MonoBehaviour
         {
             stages = new[]
             {
-                new Stage { name = "Centelha",           energyToReach = 0f,   bodyColor = new Color(0f, 1f, 1f),      scale = 1f    },
+                new Stage { name = "Centelha",           energyToReach = 0f,   bodyColor = ArtPalette.Cyan,            scale = 1f    },
                 new Stage { name = "Fragmento Desperto", energyToReach = 60f,  bodyColor = new Color(0.3f, 1f, 0.8f),  scale = 1.12f },
                 new Stage { name = "Núcleo Instável",    energyToReach = 150f, bodyColor = new Color(1f, 0.9f, 0.35f), scale = 1.24f },
                 new Stage { name = "Avatar Elemental",   energyToReach = 280f, bodyColor = new Color(0.8f, 0.5f, 1f),  scale = 1.36f },

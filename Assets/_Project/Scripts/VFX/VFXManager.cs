@@ -7,8 +7,8 @@ using UnityEngine;
 public class VFXManager : MonoBehaviour
 {
     static readonly Color KillColor        = new Color(1f, 0.6f, 0.2f);
-    static readonly Color CrystalColor     = new Color(0.2f, 1f, 1f);
-    static readonly Color FireCrystalColor = new Color(1f, 0.6f, 0.15f);
+    static readonly Color CrystalColor     = ArtPalette.Cyan;
+    static readonly Color FireCrystalColor = ArtPalette.Fire;
     static readonly Color BossColor        = new Color(1f, 0.35f, 0.15f);
 
     void OnEnable()

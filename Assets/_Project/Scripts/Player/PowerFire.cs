@@ -22,7 +22,7 @@ public class PowerFire : PowerBase
 
     public override string  DisplayName => "FOGO";
     public override KeyCode Key         => KeyCode.A;
-    public override Color   ThemeColor  => new Color(1f, 0.6f, 0.1f);
+    public override Color   ThemeColor  => ArtPalette.Fire;   // #FF4500
 
     void Awake()
     {

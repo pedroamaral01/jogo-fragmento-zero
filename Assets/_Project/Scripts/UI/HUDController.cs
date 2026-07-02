@@ -11,9 +11,9 @@ using TMPro;
 /// </summary>
 public class HUDController : MonoBehaviour
 {
-    static readonly Color EnergyHigh = new Color(0f, 1f, 1f);
+    static readonly Color EnergyHigh = ArtPalette.Cyan;       // #66FCF1
     static readonly Color EnergyMid  = new Color(1f, 0.85f, 0.25f);
-    static readonly Color EnergyLow  = new Color(1f, 0.25f, 0.2f);
+    static readonly Color EnergyLow  = ArtPalette.AlertRed;   // #FF003C
     static readonly Color BarBg      = new Color(0.03f, 0.04f, 0.07f, 0.85f);
     static readonly Color LabelDim   = new Color(0.65f, 0.65f, 0.65f);
 

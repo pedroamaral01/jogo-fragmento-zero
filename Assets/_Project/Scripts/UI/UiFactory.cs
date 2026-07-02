@@ -10,9 +10,9 @@ using TMPro;
 /// </summary>
 public static class UiFactory
 {
-    public static readonly Color Cyan   = new Color(0f, 1f, 1f);
-    public static readonly Color Dark   = new Color(0.02f, 0.03f, 0.08f, 0.97f);
-    public static readonly Color Panel  = new Color(0.05f, 0.07f, 0.15f, 0.9f);
+    public static readonly Color Cyan   = ArtPalette.Cyan;   // #66FCF1 — Ciano Base
+    public static readonly Color Dark   = new Color(0.043f, 0.047f, 0.063f, 0.97f);   // Vazio Cósmico
+    public static readonly Color Panel  = new Color(0.122f, 0.157f, 0.20f, 0.9f);     // Estruturas IA
 
     public static Canvas CreateCanvas(Transform parent, string name, int sortingOrder)
     {
