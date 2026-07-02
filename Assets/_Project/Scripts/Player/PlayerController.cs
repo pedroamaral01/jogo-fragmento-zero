@@ -26,13 +26,17 @@ public class PlayerController : MonoBehaviour
     float invTimer;
     float blinkAccum;
 
-    PowerFire firePower;
-    PowerIce  icePower;
+    PowerBase[] powers;
 
     void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
+
+        // Fogo/Gelo vêm da cena (têm refs de assets); Raio/Gravidade são
+        // procedurais e podem ser garantidos em runtime
+        if (GetComponent<PowerLightning>() == null) gameObject.AddComponent<PowerLightning>();
+        if (GetComponent<PowerGravity>()  == null) gameObject.AddComponent<PowerGravity>();
     }
 
     void OnEnable()
@@ -55,8 +59,7 @@ public class PlayerController : MonoBehaviour
     {
         Energy = GameConfig.I.startEnergy;
         transform.position = new Vector3(-5f, LaneSystem.Instance.GetLaneY(CurrentLane), 0f);
-        firePower = GetComponent<PowerFire>();
-        icePower  = GetComponent<PowerIce>();
+        powers = GetComponents<PowerBase>();
 
         var col = GetComponent<CircleCollider2D>();
         col.isTrigger = true;
@@ -84,8 +87,9 @@ public class PlayerController : MonoBehaviour
         {
             if (CurrentLane < LaneSystem.Instance.LaneCount - 1) CurrentLane++;
         }
-        if (Input.GetKeyDown(KeyCode.A)) firePower?.TryShoot();
-        if (Input.GetKeyDown(KeyCode.D)) icePower?.TryActivate();
+        // Cada poder conhece sua tecla — adicionar poder não muda o input
+        foreach (var power in powers)
+            if (Input.GetKeyDown(power.Key)) power.TryActivate();
     }
 
     void SmoothToLane()
@@ -112,7 +116,7 @@ public class PlayerController : MonoBehaviour
 
     void UpdateVisuals()
     {
-        Color c = (icePower != null && icePower.IsActive) ? colorIce : colorNormal;
+        Color c = (PowerIce.Instance != null && PowerIce.Instance.IsActive) ? colorIce : colorNormal;
         if (body  != null) body.color = c;
         if (trail != null)
         {

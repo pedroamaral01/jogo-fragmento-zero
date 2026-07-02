@@ -1,31 +1,26 @@
 using UnityEngine;
 
-public class PowerFire : MonoBehaviour
+/// <summary>Fogo — dispara projétil que destrói obstáculos (tecla A).</summary>
+public class PowerFire : PowerBase
 {
-    [SerializeField] GameObject bulletPrefab;
-    [SerializeField] float      cooldownSecs  = 0.37f;
-    [SerializeField] float      energyCost    = 4f;
-    [SerializeField] Transform  muzzlePoint;
+    [SerializeField] GameObject     bulletPrefab;
+    [SerializeField] Transform      muzzlePoint;
     [SerializeField] ParticleSystem muzzleParticles;
 
-    float timer;
+    public override string  DisplayName => "FOGO";
+    public override KeyCode Key         => KeyCode.A;
+    public override Color   ThemeColor  => new Color(1f, 0.6f, 0.1f);
 
-    public float CooldownRatio => timer <= 0f ? 1f : 1f - (timer / cooldownSecs);
-    public bool  IsReady       => timer <= 0f && bulletPrefab != null
-                                              && PlayerController.Instance != null
-                                              && PlayerController.Instance.Energy >= energyCost;
-
-    void Update()
+    void Awake()
     {
-        if (timer > 0f) timer -= Time.deltaTime;
+        if (energyCost   <= 0f) energyCost   = 4f;
+        if (cooldownSecs <= 0f) cooldownSecs = 0.37f;
     }
 
-    public void TryShoot()
-    {
-        if (!IsReady) return;
-        PlayerController.Instance.ModifyEnergy(-energyCost);
-        timer = cooldownSecs;
+    public override bool IsReady => base.IsReady && bulletPrefab != null;
 
+    protected override void Activate()
+    {
         Vector3 spawnPos = muzzlePoint != null
             ? muzzlePoint.position
             : transform.position + Vector3.right * 0.6f;

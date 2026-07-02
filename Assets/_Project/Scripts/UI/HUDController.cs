@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -14,18 +15,19 @@ public class HUDController : MonoBehaviour
     [SerializeField] TMP_Text scoreText;
     [SerializeField] TMP_Text speedText;
 
-    [Header("Poder: Fogo")]
-    [SerializeField] TMP_Text fireLabel;
-    [SerializeField] Image    fireCooldownFill;
+    // Slots de poder são construídos em runtime a partir dos PowerBase do player —
+    // a HUD não conhece poderes concretos.
+    class PowerSlot
+    {
+        public PowerBase power;
+        public GameObject root;
+        public Image fill;
+        public TMP_Text label;
+    }
 
-    [Header("Poder: Gelo")]
-    [SerializeField] TMP_Text iceLabel;
-    [SerializeField] Image    iceDurationFill;
+    readonly List<PowerSlot> slots = new List<PowerSlot>();
 
-    // Referências cacheadas — nunca usar GetComponent por frame
     PlayerController player;
-    PowerFire        fire;
-    PowerIce         ice;
     Canvas           hudCanvas;
 
     void Awake() => hudCanvas = GetComponent<Canvas>();
@@ -36,11 +38,12 @@ public class HUDController : MonoBehaviour
     void Start()
     {
         player = PlayerController.Instance;
-        if (player != null)
-        {
-            fire = player.GetComponent<PowerFire>();
-            ice  = player.GetComponent<PowerIce>();
-        }
+
+        // Painel legado da cena (barras fixas Fogo/Gelo) foi substituído pelos slots
+        var legacy = transform.Find("PowerBars");
+        if (legacy != null) legacy.gameObject.SetActive(false);
+
+        BuildPowerSlots();
         RefreshVisibility(GameManager.Instance.State);
     }
 
@@ -75,31 +78,64 @@ public class HUDController : MonoBehaviour
         if (scoreText != null) scoreText.text = $"{Mathf.FloorToInt(GameManager.Instance.Score)} m";
         if (speedText != null) speedText.text = $"{GameManager.Instance.Speed:F1}x";
 
-        RefreshFireHUD();
-        RefreshIceHUD();
-    }
-
-    void RefreshFireHUD()
-    {
-        if (fire == null) return;
-
-        if (fireCooldownFill != null) fireCooldownFill.fillAmount = fire.CooldownRatio;
-        if (fireLabel != null)
-            fireLabel.text = fire.IsReady ? "A  FOGO ►" : "A  FOGO (cd)";
-    }
-
-    void RefreshIceHUD()
-    {
-        if (ice == null) return;
-
-        float fillPct = ice.IsActive ? ice.TimeLeft / 4f : (ice.IsReady ? 1f : 0f);
-        if (iceDurationFill != null) iceDurationFill.fillAmount = fillPct;
-        if (iceLabel != null)
+        foreach (var slot in slots)
         {
-            if (ice.IsActive) iceLabel.text = $"D  GELO {ice.TimeLeft:F1}s";
-            else if (ice.IsReady) iceLabel.text = "D  GELO [OK]";
-            else iceLabel.text = "D  GELO (cd)";
+            if (slot.power == null) continue;
+            slot.fill.fillAmount = slot.power.HudFillRatio;
+            slot.label.text      = slot.power.HudLabel;
+            slot.label.color     = slot.power.IsReady ? Color.white : new Color(0.65f, 0.65f, 0.65f);
         }
     }
 
+    // ── Slots de poder ──────────────────────────────────────────────────────
+
+    public void BuildPowerSlots()
+    {
+        foreach (var slot in slots)
+            if (slot.root != null) Destroy(slot.root);
+        slots.Clear();
+
+        if (player == null) return;
+
+        int row = 0;
+        foreach (var power in player.GetComponents<PowerBase>())
+        {
+            if (!power.IsUnlocked) continue;
+            slots.Add(CreateSlot(power, row++));
+        }
+    }
+
+    PowerSlot CreateSlot(PowerBase power, int row)
+    {
+        float y = 50f + row * 26f;
+
+        var root = UiFactory.Rect(transform, $"PowerSlot_{power.DisplayName}",
+            Vector2.zero, new Vector2(10, y), new Vector2(240, 22)).gameObject;
+        var rootRt = root.GetComponent<RectTransform>();
+        rootRt.pivot = new Vector2(0f, 0f);
+
+        // Fundo da barra
+        var bgRt = UiFactory.Rect(root.transform, "BarBG",
+            new Vector2(0f, 0.5f), new Vector2(55, 0), new Vector2(110, 10));
+        bgRt.gameObject.AddComponent<Image>().color = new Color(0.05f, 0.05f, 0.05f, 0.75f);
+
+        // Preenchimento (cooldown/duração) na cor do poder
+        var fillGo = new GameObject("Fill");
+        fillGo.transform.SetParent(bgRt, false);
+        var fillRt = fillGo.AddComponent<RectTransform>();
+        fillRt.anchorMin = Vector2.zero;
+        fillRt.anchorMax = Vector2.one;
+        fillRt.offsetMin = Vector2.zero;
+        fillRt.offsetMax = Vector2.zero;
+        var fill = fillGo.AddComponent<Image>();
+        fill.color      = power.ThemeColor;
+        fill.type       = Image.Type.Filled;
+        fill.fillMethod = Image.FillMethod.Horizontal;
+
+        var label = UiFactory.Text(root.transform, "Label", power.HudLabel,
+            11f, new Vector2(0f, 0.5f), new Vector2(186, 0), new Vector2(140, 16),
+            Color.white, TextAlignmentOptions.Left);
+
+        return new PowerSlot { power = power, root = root, fill = fill, label = label };
+    }
 }

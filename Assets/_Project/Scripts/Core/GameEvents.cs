@@ -28,6 +28,9 @@ public static class GameEvents
     /// <summary>Player levou dano de obstáculo.</summary>
     public static event Action PlayerHit;
 
+    /// <summary>Um poder foi ativado com sucesso.</summary>
+    public static event Action<PowerBase> PowerActivated;
+
     public static void RaiseStateChanged(GameState previous, GameState next)
         => StateChanged?.Invoke(previous, next);
 
@@ -42,4 +45,7 @@ public static class GameEvents
 
     public static void RaisePlayerHit()
         => PlayerHit?.Invoke();
+
+    public static void RaisePowerActivated(PowerBase power)
+        => PowerActivated?.Invoke(power);
 }

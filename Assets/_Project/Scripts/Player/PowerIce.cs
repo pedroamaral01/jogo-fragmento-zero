@@ -1,39 +1,58 @@
 using UnityEngine;
 
-public class PowerIce : MonoBehaviour
+/// <summary>
+/// Gelo — congela o tempo por alguns segundos (tecla D):
+/// meteoros/cristais a 25% da velocidade, drones parados.
+/// Consultado globalmente via Instance (Meteor, Drone, Crystal, Starfield).
+/// </summary>
+public class PowerIce : PowerBase
 {
     public static PowerIce Instance { get; private set; }
 
     [SerializeField] float durationSecs = 4f;
-    [SerializeField] float energyCost   = 22f;
     [SerializeField] ParticleSystem activateParticles;
 
-    float timer;
+    float durationTimer;
 
-    public bool  IsActive   => timer > 0f;
-    public float TimeLeft   => timer;
-    public float SlowFactor => IsActive ? 0.25f : 1f;
+    public override string  DisplayName => "GELO";
+    public override KeyCode Key         => KeyCode.D;
+    public override Color   ThemeColor  => new Color(0.2f, 0.9f, 1f);
+
+    public bool  IsActive      => durationTimer > 0f;
+    public float TimeLeft      => durationTimer;
+    public float SlowFactor    => IsActive ? 0.25f : 1f;
     public bool  IsDroneFrozen => IsActive;
 
-    public bool IsReady => timer <= 0f && PlayerController.Instance != null
-                                       && PlayerController.Instance.Energy >= energyCost;
+    // Sem cooldown extra: pronto de novo assim que o efeito termina (como no VS)
+    public override bool IsReady => base.IsReady && !IsActive;
 
     void Awake()
     {
-        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
+        if (energyCost <= 0f) energyCost = 22f;
     }
 
-    void Update()
+    protected override void Update()
     {
-        if (timer > 0f) timer -= Time.deltaTime;
+        base.Update();
+        if (durationTimer > 0f) durationTimer -= Time.deltaTime;
     }
 
-    public void TryActivate()
+    protected override void Activate()
     {
-        if (!IsReady) return;
-        PlayerController.Instance.ModifyEnergy(-energyCost);
-        timer = durationSecs;
+        durationTimer = durationSecs;
         if (activateParticles != null) activateParticles.Play();
+    }
+
+    public override float HudFillRatio =>
+        IsActive ? durationTimer / durationSecs : (IsReady ? 1f : 0f);
+
+    public override string HudLabel
+    {
+        get
+        {
+            if (IsActive) return $"{Key}  {DisplayName} {durationTimer:F1}s";
+            return IsReady ? $"{Key}  {DisplayName} [OK]" : $"{Key}  {DisplayName} (cd)";
+        }
     }
 }
