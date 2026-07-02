@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class ObstacleBase : MonoBehaviour
+public class ObstacleBase : MonoBehaviour, IDamageable, IPlayerHazard
 {
     [SerializeField] protected int   maxHp         = 1;
     [SerializeField] protected float speedMultMin  = 1f;

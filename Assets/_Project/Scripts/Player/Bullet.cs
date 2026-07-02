@@ -26,7 +26,11 @@ public class Bullet : MonoBehaviour
     {
         if (!other.CompareTag("Obstacle")) return;
 
-        other.GetComponent<ObstacleBase>()?.TakeDamage(1);
+        // Interface cobre obstáculos, chefes e projéteis destrutíveis
+        var damageable = other.GetComponent<IDamageable>();
+        if (damageable == null) return;
+
+        damageable.TakeDamage(1);
 
         if (hitEffectPrefab != null)
             Instantiate(hitEffectPrefab, transform.position, Quaternion.identity);

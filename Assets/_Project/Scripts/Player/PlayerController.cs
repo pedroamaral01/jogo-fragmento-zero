@@ -169,7 +169,7 @@ public class PlayerController : MonoBehaviour
     void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Obstacle"))
-            other.GetComponent<ObstacleBase>()?.OnHitPlayer();
+            other.GetComponent<IPlayerHazard>()?.OnHitPlayer();
         else if (other.CompareTag("Crystal"))
             other.GetComponent<Crystal>()?.OnCollected();
     }

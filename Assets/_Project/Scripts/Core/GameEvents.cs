@@ -40,6 +40,15 @@ public static class GameEvents
     /// <summary>Tier de dificuldade da Fenda subiu.</summary>
     public static event Action<int> DifficultyChanged;
 
+    /// <summary>Um chefão entrou na arena.</summary>
+    public static event Action<BossBase> BossSpawned;
+
+    /// <summary>Chefão mudou de fase.</summary>
+    public static event Action<BossBase, int> BossPhaseChanged;
+
+    /// <summary>Chefão foi destruído.</summary>
+    public static event Action<BossBase> BossDefeated;
+
     public static void RaiseStateChanged(GameState previous, GameState next)
         => StateChanged?.Invoke(previous, next);
 
@@ -66,4 +75,13 @@ public static class GameEvents
 
     public static void RaiseDifficultyChanged(int tier)
         => DifficultyChanged?.Invoke(tier);
+
+    public static void RaiseBossSpawned(BossBase boss)
+        => BossSpawned?.Invoke(boss);
+
+    public static void RaiseBossPhaseChanged(BossBase boss, int phase)
+        => BossPhaseChanged?.Invoke(boss, phase);
+
+    public static void RaiseBossDefeated(BossBase boss)
+        => BossDefeated?.Invoke(boss);
 }

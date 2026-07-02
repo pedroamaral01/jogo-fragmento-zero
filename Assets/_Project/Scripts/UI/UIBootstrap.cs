@@ -20,5 +20,6 @@ public static class UIBootstrap
         root.AddComponent<GameOverController>();
         root.AddComponent<ToastUI>();
         root.AddComponent<TutorialController>();
+        root.AddComponent<BossHealthBarUI>();
     }
 }
