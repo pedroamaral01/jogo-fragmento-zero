@@ -32,6 +32,8 @@ public class ToastUI : MonoBehaviour
         GameEvents.EvolutionChanged  += OnEvolutionChanged;
         GameEvents.PowerUnlocked     += OnPowerUnlocked;
         GameEvents.DifficultyChanged += OnDifficultyChanged;
+        GameEvents.BossSpawned       += OnBossSpawned;
+        GameEvents.BossDefeated      += OnBossDefeated;
         GameEvents.StateChanged      += OnStateChanged;
     }
 
@@ -40,11 +42,19 @@ public class ToastUI : MonoBehaviour
         GameEvents.EvolutionChanged  -= OnEvolutionChanged;
         GameEvents.PowerUnlocked     -= OnPowerUnlocked;
         GameEvents.DifficultyChanged -= OnDifficultyChanged;
+        GameEvents.BossSpawned       -= OnBossSpawned;
+        GameEvents.BossDefeated      -= OnBossDefeated;
         GameEvents.StateChanged      -= OnStateChanged;
     }
 
     void OnDifficultyChanged(int tier)
         => Enqueue($"⚠ A FENDA ESTÁ MAIS INSTÁVEL — NÍVEL {tier}", new Color(1f, 0.45f, 0.3f));
+
+    void OnBossSpawned(BossBase boss)
+        => Enqueue($"⚠ CONSTRUTO DA MENTE MATRIZ: {boss.DisplayName}", new Color(1f, 0.3f, 0.3f));
+
+    void OnBossDefeated(BossBase boss)
+        => Enqueue("CONSTRUTO DESTRUÍDO — ENERGIA RESTAURADA", new Color(0.4f, 1f, 0.5f));
 
     void OnEvolutionChanged(int level, string stageName)
         => Enqueue($"✦ EVOLUÇÃO — {stageName.ToUpper()} ✦", new Color(1f, 0.85f, 0.2f));
