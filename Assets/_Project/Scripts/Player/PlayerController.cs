@@ -8,11 +8,7 @@ public class PlayerController : MonoBehaviour
     [Header("Movement")]
     [SerializeField] float laneSmoothing  = 10f;
 
-    [Header("Energy")]
-    [SerializeField] float startEnergy    = 60f;
-    [SerializeField] float drainPerFrame  = 0.02f;   // matches original
-    [SerializeField] float hitDamage      = 25f;
-    [SerializeField] float invincibleSecs = 1.17f;   // 70 frames / 60 fps
+    // Economia de energia vive no GameConfig (Resources/GameConfig.asset)
 
     [Header("References")]
     [SerializeField] SpriteRenderer body;
@@ -39,9 +35,25 @@ public class PlayerController : MonoBehaviour
         Instance = this;
     }
 
+    void OnEnable()
+    {
+        GameEvents.EnemyKilled      += OnEnemyKilled;
+        GameEvents.CrystalCollected += OnCrystalCollected;
+    }
+
+    void OnDisable()
+    {
+        GameEvents.EnemyKilled      -= OnEnemyKilled;
+        GameEvents.CrystalCollected -= OnCrystalCollected;
+    }
+
+    void OnEnemyKilled(ObstacleBase enemy, Vector3 pos) => ModifyEnergy(GameConfig.I.killEnergyReward);
+
+    void OnCrystalCollected(Vector3 pos, float energy, float score) => ModifyEnergy(energy);
+
     void Start()
     {
-        Energy = startEnergy;
+        Energy = GameConfig.I.startEnergy;
         transform.position = new Vector3(-5f, LaneSystem.Instance.GetLaneY(CurrentLane), 0f);
         firePower = GetComponent<PowerFire>();
         icePower  = GetComponent<PowerIce>();
@@ -57,7 +69,7 @@ public class PlayerController : MonoBehaviour
 
         HandleInput();
         SmoothToLane();
-        Drain(drainPerFrame * Time.deltaTime * 60f);
+        Drain(GameConfig.I.drainPerSecond * Time.deltaTime);
         HandleInvincibility();
         UpdateVisuals();
     }
@@ -112,17 +124,17 @@ public class PlayerController : MonoBehaviour
     public void TakeHit()
     {
         if (IsInvincible) return;
-        Drain(hitDamage);
-        invTimer   = invincibleSecs;
+        Drain(GameConfig.I.hitDamage);
+        invTimer   = GameConfig.I.invincibleSecs;
         blinkAccum = 0f;
         if (hitParticles != null) hitParticles.Play();
-        if (ScreenEffects.Instance != null) ScreenEffects.Instance.TriggerShake(0.25f, 0.35f);
+        GameEvents.RaisePlayerHit();
     }
 
     // Used by powers and obstacles — positive = gain, negative = spend
     public void ModifyEnergy(float delta)
     {
-        Energy = Mathf.Clamp(Energy + delta, 0f, 100f);
+        Energy = Mathf.Clamp(Energy + delta, 0f, GameConfig.I.maxEnergy);
         if (Energy <= 0f) GameManager.Instance.TriggerGameOver();
     }
 

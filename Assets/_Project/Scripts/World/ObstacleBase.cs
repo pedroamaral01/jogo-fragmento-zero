@@ -39,11 +39,12 @@ public class ObstacleBase : MonoBehaviour
     public virtual void TakeDamage(int amount)
     {
         hp -= amount;
-        ScreenEffects.Instance?.TriggerFlash(0.18f);
+        GameEvents.RaiseEnemyDamaged(this);
 
         if (hp <= 0)
         {
-            PlayerController.Instance?.ModifyEnergy(6f);  // +6 energy reward for kill
+            // Consequências (recompensa, flash, som) são responsabilidade dos assinantes
+            GameEvents.RaiseEnemyKilled(this, transform.position);
             if (deathEffectPrefab != null)
                 Instantiate(deathEffectPrefab, transform.position, Quaternion.identity);
             Destroy(gameObject);

@@ -27,6 +27,25 @@ public class ScreenEffects : MonoBehaviour
         cameraOrigin = mainCamera.transform.position;
     }
 
+    // Feedbacks visuais reagem a eventos — ninguém precisa chamar esta classe
+    void OnEnable()
+    {
+        GameEvents.PlayerHit        += OnPlayerHit;
+        GameEvents.EnemyDamaged     += OnEnemyDamaged;
+        GameEvents.CrystalCollected += OnCrystalCollected;
+    }
+
+    void OnDisable()
+    {
+        GameEvents.PlayerHit        -= OnPlayerHit;
+        GameEvents.EnemyDamaged     -= OnEnemyDamaged;
+        GameEvents.CrystalCollected -= OnCrystalCollected;
+    }
+
+    void OnPlayerHit()                                   => TriggerShake(0.25f, 0.35f);
+    void OnEnemyDamaged(ObstacleBase enemy)              => TriggerFlash(0.18f);
+    void OnCrystalCollected(Vector3 p, float e, float s) => TriggerFlash(0.08f);
+
     void Update()
     {
         UpdateShake();

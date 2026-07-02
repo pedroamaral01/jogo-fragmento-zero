@@ -28,9 +28,8 @@ public class Crystal : MonoBehaviour
 
     public void OnCollected()
     {
-        PlayerController.Instance?.ModifyEnergy(energyReward);
-        GameManager.Instance?.AddScore(scoreReward);
-        ScreenEffects.Instance?.TriggerFlash(0.08f);
+        // Energia, score e feedback são aplicados pelos assinantes do evento
+        GameEvents.RaiseCrystalCollected(transform.position, energyReward, scoreReward);
 
         if (collectEffectPrefab != null)
             Instantiate(collectEffectPrefab, transform.position, Quaternion.identity);

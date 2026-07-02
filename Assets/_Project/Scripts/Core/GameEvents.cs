@@ -16,6 +16,9 @@ public static class GameEvents
     /// <summary>(estadoAnterior, estadoNovo)</summary>
     public static event Action<GameState, GameState> StateChanged;
 
+    /// <summary>Inimigo levou dano (mesmo sem morrer).</summary>
+    public static event Action<ObstacleBase> EnemyDamaged;
+
     /// <summary>Inimigo destruído por dano (posição do inimigo).</summary>
     public static event Action<ObstacleBase, Vector3> EnemyKilled;
 
@@ -27,6 +30,9 @@ public static class GameEvents
 
     public static void RaiseStateChanged(GameState previous, GameState next)
         => StateChanged?.Invoke(previous, next);
+
+    public static void RaiseEnemyDamaged(ObstacleBase enemy)
+        => EnemyDamaged?.Invoke(enemy);
 
     public static void RaiseEnemyKilled(ObstacleBase enemy, Vector3 position)
         => EnemyKilled?.Invoke(enemy, position);

@@ -27,41 +27,55 @@ public class HUDController : MonoBehaviour
     [SerializeField] TMP_Text   gameOverScore;
     [SerializeField] TMP_Text   gameOverInstructions;
 
-    bool gameOverShown;
+    // Referências cacheadas — nunca usar GetComponent por frame
+    PlayerController player;
+    PowerFire        fire;
+    PowerIce         ice;
+
+    void OnEnable()  => GameEvents.StateChanged += OnStateChanged;
+    void OnDisable() => GameEvents.StateChanged -= OnStateChanged;
+
+    void Start()
+    {
+        player = PlayerController.Instance;
+        if (player != null)
+        {
+            fire = player.GetComponent<PowerFire>();
+            ice  = player.GetComponent<PowerIce>();
+        }
+    }
+
+    void OnStateChanged(GameState previous, GameState next)
+    {
+        if (next == GameState.GameOver) ShowGameOver();
+    }
 
     void Update()
     {
-        if (!gameOverShown && GameManager.Instance.State == GameState.GameOver)
-        {
-            ShowGameOver();
-            gameOverShown = true;
-        }
-
+        // Valores contínuos (energia/score/cooldown) mudam todo frame — polling é adequado
         if (GameManager.Instance.IsGameplayActive)
             RefreshHUD();
     }
 
     void RefreshHUD()
     {
-        var player = PlayerController.Instance;
         if (player == null) return;
 
-        float pct = player.Energy / 100f;
+        float pct = player.Energy / GameConfig.I.maxEnergy;
 
         if (energyFill  != null) energyFill.fillAmount = pct;
         if (energyLabel != null) energyLabel.text = $"ENERGIA {Mathf.FloorToInt(player.Energy)}";
-        if (energyFill  != null) energyFill.color = player.Energy < 25f ? colorLow : colorNormal;
+        if (energyFill  != null) energyFill.color = pct < GameConfig.I.lowEnergyWarning ? colorLow : colorNormal;
 
         if (scoreText != null) scoreText.text = $"{Mathf.FloorToInt(GameManager.Instance.Score)} m";
         if (speedText != null) speedText.text = $"{GameManager.Instance.Speed:F1}x";
 
-        RefreshFireHUD(player);
-        RefreshIceHUD(player);
+        RefreshFireHUD();
+        RefreshIceHUD();
     }
 
-    void RefreshFireHUD(PlayerController player)
+    void RefreshFireHUD()
     {
-        var fire = player.GetComponent<PowerFire>();
         if (fire == null) return;
 
         if (fireCooldownFill != null) fireCooldownFill.fillAmount = fire.CooldownRatio;
@@ -69,9 +83,8 @@ public class HUDController : MonoBehaviour
             fireLabel.text = fire.IsReady ? "A  FOGO ►" : "A  FOGO (cd)";
     }
 
-    void RefreshIceHUD(PlayerController player)
+    void RefreshIceHUD()
     {
-        var ice = player.GetComponent<PowerIce>();
         if (ice == null) return;
 
         float fillPct = ice.IsActive ? ice.TimeLeft / 4f : (ice.IsReady ? 1f : 0f);
