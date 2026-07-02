@@ -22,8 +22,11 @@ public static class GameEvents
     /// <summary>Inimigo destruído por dano (posição do inimigo).</summary>
     public static event Action<ObstacleBase, Vector3> EnemyKilled;
 
-    /// <summary>Cristal coletado (posição, energia, score).</summary>
+    /// <summary>Cristal azul coletado (posição, energia, score).</summary>
     public static event Action<Vector3, float, float> CrystalCollected;
+
+    /// <summary>Cristal de fogo laranja coletado (posição, carga restaurada).</summary>
+    public static event Action<Vector3, float> FireCrystalCollected;
 
     /// <summary>Player levou dano de obstáculo.</summary>
     public static event Action PlayerHit;
@@ -60,6 +63,9 @@ public static class GameEvents
 
     public static void RaiseCrystalCollected(Vector3 position, float energy, float score)
         => CrystalCollected?.Invoke(position, energy, score);
+
+    public static void RaiseFireCrystalCollected(Vector3 position, float charge)
+        => FireCrystalCollected?.Invoke(position, charge);
 
     public static void RaisePlayerHit()
         => PlayerHit?.Invoke();

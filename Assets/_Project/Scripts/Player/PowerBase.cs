@@ -27,10 +27,15 @@ public abstract class PowerBase : MonoBehaviour
     public float CooldownRatio =>
         cooldownSecs <= 0f || cooldownTimer <= 0f ? 1f : 1f - cooldownTimer / cooldownSecs;
 
-    public virtual bool IsReady =>
-        IsUnlocked && cooldownTimer <= 0f &&
+    public virtual bool IsReady => IsUnlocked && cooldownTimer <= 0f && HasResources;
+
+    /// <summary>Recurso disponível? Padrão: energia do player. Fogo usa carga própria.</summary>
+    protected virtual bool HasResources =>
         PlayerController.Instance != null &&
         PlayerController.Instance.Energy >= energyCost;
+
+    protected virtual void PayCost() =>
+        PlayerController.Instance.ModifyEnergy(-energyCost);
 
     protected virtual void Update()
     {
@@ -41,7 +46,7 @@ public abstract class PowerBase : MonoBehaviour
     {
         if (!IsReady) return false;
 
-        PlayerController.Instance.ModifyEnergy(-energyCost);
+        PayCost();
         cooldownTimer = cooldownSecs;
         Activate();
         GameEvents.RaisePowerActivated(this);
@@ -60,4 +65,7 @@ public abstract class PowerBase : MonoBehaviour
 
     public virtual string HudLabel =>
         IsReady ? $"{Key}  {DisplayName} ►" : $"{Key}  {DisplayName} (cd)";
+
+    /// <summary>Recurso criticamente baixo — a HUD pisca a barra.</summary>
+    public virtual bool HudCritical => false;
 }

@@ -41,8 +41,9 @@ public class PowerGravity : PowerBase
         durationTimer = durationSecs;
     }
 
+    // Ativa: barra drena com a duração; senão: enche com o cooldown
     public override float HudFillRatio =>
-        IsActive ? durationTimer / durationSecs : (IsReady ? 1f : 0f);
+        IsActive ? durationTimer / durationSecs : CooldownRatio;
 
     public override string HudLabel
     {
