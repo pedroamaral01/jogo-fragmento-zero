@@ -1,5 +1,11 @@
 using UnityEngine;
 
+/// <summary>
+/// Director de spawn procedural: executa SpawnPatterns coluna a coluna,
+/// escolhidos por peso e filtrados pelo tier de dificuldade.
+/// (Mantém o nome ObstacleSpawner: o componente e as refs de prefab já
+/// vivem na cena.)
+/// </summary>
 public class ObstacleSpawner : MonoBehaviour
 {
     [SerializeField] GameObject meteorPrefab;
@@ -7,43 +13,90 @@ public class ObstacleSpawner : MonoBehaviour
     [SerializeField] GameObject crystalPrefab;
     [SerializeField] float      spawnX = 9f;
 
-    // Original: 60% obstacle, 40% crystal. Obstacle split: 60% meteor, 40% drone.
-    [SerializeField] float obstacleChance = 0.6f;
-    [SerializeField] float meteorChance   = 0.6f;
-    [SerializeField] float extraCrystalChance = 0.35f;
+    [Tooltip("Respiro (s) entre um padrão e o próximo — encolhe com o tier")]
+    [SerializeField] float patternGapSecs = 1.1f;
 
-    float frameAccum;
+    SpawnPattern current;
+    int   columnIndex;
+    bool  mirrored;
+    float patternSpeedMult = 1f;
+    float timer = 1f;   // pequena espera inicial
 
     void Update()
     {
-        // Spawner só trabalha na corrida normal — pausa automática durante BossFight
+        // Só trabalha na corrida normal — BossFight pausa a geração
         if (GameManager.Instance.State != GameState.Running) return;
 
-        // Accumulate in "frames at 60fps" to match the original rate formula
-        frameAccum += Time.deltaTime * 60f;
-        float rate  = Mathf.Max(38f, 100f - GameManager.Instance.Score * 0.25f);
+        timer -= Time.deltaTime;
+        if (timer > 0f) return;
 
-        if (frameAccum < rate) return;
-        frameAccum = 0f;
+        if (current == null) PickPattern();
 
-        if (Random.value < obstacleChance) SpawnObstacle();
-        else                               SpawnCrystal();
+        SpawnColumn(current.columns[columnIndex]);
+        columnIndex++;
 
-        if (Random.value < extraCrystalChance) SpawnCrystal();
+        float gapMult = GameManager.Instance.Difficulty.SpawnGapMultiplier;
+
+        if (columnIndex >= current.columns.Length)
+        {
+            current = null;
+            timer   = patternGapSecs * gapMult;
+        }
+        else
+        {
+            timer = current.columnGap * gapMult;
+        }
     }
 
-    void SpawnObstacle()
+    void PickPattern()
     {
-        int   lane = Random.Range(0, LaneSystem.Instance.LaneCount);
-        float y    = LaneSystem.Instance.GetLaneY(lane);
-        var prefab = Random.value < meteorChance ? meteorPrefab : dronePrefab;
-        Instantiate(prefab, new Vector3(spawnX, y, 0f), Quaternion.identity);
+        int tier = GameManager.Instance.Difficulty.Tier;
+
+        // Seleção ponderada entre os padrões liberados para o tier atual
+        float total = 0f;
+        foreach (var p in SpawnPattern.Library)
+            if (p.minTier <= tier) total += p.weight;
+
+        float roll = Random.value * total;
+        foreach (var p in SpawnPattern.Library)
+        {
+            if (p.minTier > tier) continue;
+            roll -= p.weight;
+            if (roll <= 0f) { current = p; break; }
+        }
+        if (current == null) current = SpawnPattern.Library[0];
+
+        mirrored    = current.allowMirror && Random.value < 0.5f;
+        columnIndex = 0;
+
+        // Um multiplicador por padrão (não por entidade) mantém formações coesas
+        patternSpeedMult = Random.Range(1f, 1.25f);
     }
 
-    void SpawnCrystal()
+    void SpawnColumn(string column)
     {
-        int   lane = Random.Range(0, LaneSystem.Instance.LaneCount);
-        float y    = LaneSystem.Instance.GetLaneY(lane);
-        Instantiate(crystalPrefab, new Vector3(spawnX, y, 0f), Quaternion.identity);
+        int lanes = Mathf.Min(column.Length, LaneSystem.Instance.LaneCount);
+
+        for (int lane = 0; lane < lanes; lane++)
+        {
+            char code = column[mirrored ? column.Length - 1 - lane : lane];
+
+            GameObject prefab = code switch
+            {
+                'M' => meteorPrefab,
+                'D' => dronePrefab,
+                'C' => crystalPrefab,
+                _   => null
+            };
+            if (prefab == null) continue;
+
+            float y  = LaneSystem.Instance.GetLaneY(lane);
+            var   go = Instantiate(prefab, new Vector3(spawnX, y, 0f), Quaternion.identity);
+
+            if (go.TryGetComponent<ObstacleBase>(out var obstacle))
+                obstacle.OverrideSpeedMultiplier(patternSpeedMult);
+            else if (go.TryGetComponent<Crystal>(out var crystal))
+                crystal.OverrideSpeedMultiplier(patternSpeedMult);
+        }
     }
 }

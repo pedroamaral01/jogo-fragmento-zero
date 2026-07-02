@@ -10,6 +10,11 @@ public class Crystal : MonoBehaviour
 
     const float DespawnX = -10f;
 
+    float speedMult = 1f;
+
+    /// <summary>Mesmo multiplicador dos obstáculos do padrão — colunas coesas.</summary>
+    public void OverrideSpeedMultiplier(float multiplier) => speedMult = multiplier;
+
     void Start()
     {
         GetComponent<CircleCollider2D>().isTrigger = true;
@@ -32,7 +37,7 @@ public class Crystal : MonoBehaviour
         else
         {
             float slow = PowerIce.Instance != null && PowerIce.Instance.IsActive ? 0.25f : 1f;
-            transform.position += Vector3.left * GameManager.Instance.Speed * slow * Time.deltaTime;
+            transform.position += Vector3.left * GameManager.Instance.Speed * speedMult * slow * Time.deltaTime;
         }
 
         transform.Rotate(0f, 0f, rotationSpeed * Time.deltaTime);

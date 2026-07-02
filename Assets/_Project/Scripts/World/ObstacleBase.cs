@@ -19,6 +19,9 @@ public class ObstacleBase : MonoBehaviour
         baseSpeedMult = Random.Range(speedMultMin, speedMultMax);
     }
 
+    /// <summary>Spawner define um multiplicador único por padrão — formações coesas.</summary>
+    public void OverrideSpeedMultiplier(float multiplier) => baseSpeedMult = multiplier;
+
     void Update()
     {
         if (!GameManager.Instance.IsGameplayActive) return;
